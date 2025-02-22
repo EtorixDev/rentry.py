@@ -469,10 +469,11 @@ class RentrySyncClient(RentryBase):
         if is_modify_code and (new_edit_code or new_modify_code):
             raise RentryInvalidEditCodeError("Modify codes can't be used to change the edit or modify codes.")
         edit_code = self._verify_edit_code(edit_code) if not is_modify_code else self._verify_modify_code(edit_code)
+        new_page_id = self._verify_page_id(new_page_id) if new_page_id else ""
         new_edit_code = self._verify_edit_code(new_edit_code) if new_edit_code else ""
         new_modify_code = self._verify_modify_code(new_modify_code) if new_modify_code else ""
         page_id = self._verify_page_id(page_id)
-        markdown = self._verify_markdown(markdown, True) if markdown else ""
+        markdown = self._verify_markdown(markdown, True) if markdown is not None else ""
         payload: dict = {**self.payload, "edit_code": edit_code}
         if new_edit_code:
             payload["new_edit_code"] = new_edit_code
@@ -485,7 +486,7 @@ class RentrySyncClient(RentryBase):
         if not overwrite_metadata:
             payload["update_mode"] = "upsert"
         self._decipher_update(self._get_response("POST", f"/api/edit/{page_id}", payload))
-        return self.fetch(page_id, new_edit_code or edit_code) if fetch else RentrySyncPage(self, page_id, markdown, new_edit_code or edit_code, new_modify_code, metadata)
+        return self.fetch(new_page_id or page_id, new_edit_code or edit_code) if fetch else RentrySyncPage(self, page_id, markdown, new_edit_code or edit_code, new_modify_code, metadata)
 
     def delete(self, page_id: str, edit_code: str) -> RentrySyncPage:
         """---
@@ -568,8 +569,8 @@ class RentrySyncPage:
         self.markdown: Optional[str] = markdown
         self.edit_code: Optional[str] = edit_code
         self.modify_code: Optional[str] = modify_code
-        self.metadata: Optional[RentryPageMetadata] = metadata
-        self.stats: Optional[RentryPageStats] = stats
+        self.metadata: RentryPageMetadata = metadata or RentryPageMetadata()
+        self.stats: RentryPageStats = stats or RentryPageStats()
 
     @property
     def page_url(self) -> str:
@@ -714,7 +715,7 @@ class RentrySyncPage:
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        self.stats = None
+        self.stats = RentryPageStats()
         self.client.delete(self.page_id, self.edit_code or "")
 
     def __str__(self) -> str:
@@ -931,7 +932,7 @@ class RentryAsyncClient(RentryBase):
         edit_code = response["edit_code"]
         return await self.fetch(page_id, edit_code) if fetch else RentryAsyncPage(self, page_id, markdown, edit_code, metadata=metadata)
 
-    async def update(self, page_id: str, edit_code: str, new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite_metadata: bool = False, fetch: bool = False) -> RentryAsyncPage:
+    async def update(self, page_id: str, edit_code: str, new_page_id: Optional[str], new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite_metadata: bool = False, fetch: bool = False) -> RentryAsyncPage:
         """---
         Update a page you have the edit code for. You may also provide a modify code if you have one.
 
@@ -939,6 +940,9 @@ class RentryAsyncClient(RentryBase):
         - page_id: `str` — The page to update.
         - edit_code: `str` — The edit code for the page.
             - May be a modify code instead. Modify codes start with "m:" and do not allow updating the edit or modify codes or deleting the page.
+        - new_page_id: `Optional[str] = None` — The new ID of the page.
+            - Must be between 2 and 100 characters.
+            - Must contain only latin letters, numbers, underscores and hyphens.
         - new_edit_code: `Optional[str] = None` — The new edit code for the page.
             - Must be between 1 and 100 characters.
             - Can't start with "m:" as that is reserved for modify codes.
@@ -973,10 +977,11 @@ class RentryAsyncClient(RentryBase):
         if is_modify_code and (new_edit_code or new_modify_code):
             raise RentryInvalidEditCodeError("Modify codes can't be used to change the edit or modify codes.")
         edit_code = self._verify_edit_code(edit_code) if not is_modify_code else self._verify_modify_code(edit_code)
+        new_page_id = self._verify_page_id(new_page_id) if new_page_id else ""
         new_edit_code = self._verify_edit_code(new_edit_code) if new_edit_code else ""
         new_modify_code = self._verify_modify_code(new_modify_code) if new_modify_code else ""
         page_id = self._verify_page_id(page_id)
-        markdown = self._verify_markdown(markdown, True) if markdown else ""
+        markdown = self._verify_markdown(markdown, True) if markdown is not None else ""
         payload: dict = {**self.payload, "edit_code": edit_code}
         if new_edit_code:
             payload["new_edit_code"] = new_edit_code
@@ -989,7 +994,7 @@ class RentryAsyncClient(RentryBase):
         if not overwrite_metadata:
             payload["update_mode"] = "upsert"
         self._decipher_update(await self._get_response("POST", f"/api/edit/{page_id}", payload))
-        return await self.fetch(page_id, new_edit_code or edit_code) if fetch else RentryAsyncPage(self, page_id, markdown, new_edit_code or edit_code, new_modify_code, metadata)
+        return await self.fetch(new_page_id or page_id, new_edit_code or edit_code) if fetch else RentryAsyncPage(self, page_id, markdown, new_edit_code or edit_code, new_modify_code, metadata)
 
     async def delete(self, page_id: str, edit_code: str) -> RentryAsyncPage:
         """---
@@ -1072,8 +1077,8 @@ class RentryAsyncPage:
         self.markdown: Optional[str] = markdown
         self.edit_code: Optional[str] = edit_code
         self.modify_code: Optional[str] = modify_code
-        self.metadata: Optional[RentryPageMetadata] = metadata
-        self.stats: Optional[RentryPageStats] = stats
+        self.metadata: RentryPageMetadata = metadata or RentryPageMetadata()
+        self.stats: RentryPageStats = stats or RentryPageStats()
 
     @property
     def page_url(self) -> str:
@@ -1161,11 +1166,14 @@ class RentryAsyncPage:
         self.modify_code = page.modify_code
         self.stats = page.stats
 
-    async def update(self, new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite_metadata: bool = False, fetch: bool = False) -> None:
+    async def update(self, new_page_id: Optional[str] = None, new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite_metadata: bool = False, fetch: bool = False) -> None:
         """---
         Update the page if the edit or modify code is set. Modify codes do not allow updating the edit or modify codes or deleting the page.
 
         #### Arguments
+        - new_page_id: `Optional[str] = None` — The new ID of the page.
+            - Must be between 2 and 100 characters.
+            - Must contain only latin letters, numbers, underscores and hyphens.
         - new_edit_code: `Optional[str] = None` — The new edit code for the page.
             - Must be between 1 and 100 characters.
             - Can't start with "m:" as that is reserved for modify codes.
@@ -1196,7 +1204,7 @@ class RentryAsyncPage:
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        page: RentryAsyncPage = await self.client.update(self.page_id, self.edit_code or "", new_edit_code, new_modify_code, markdown or self.markdown, metadata or self.metadata, overwrite_metadata, fetch)
+        page: RentryAsyncPage = await self.client.update(self.page_id, self.edit_code or "", new_page_id, new_edit_code, new_modify_code, markdown or self.markdown, metadata or self.metadata, overwrite_metadata, fetch)
         self.edit_code = page.edit_code
         self.modify_code = page.modify_code
         self.markdown = page.markdown
@@ -1215,7 +1223,7 @@ class RentryAsyncPage:
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        self.stats = None
+        self.stats = RentryPageStats()
         await self.client.delete(self.page_id, self.edit_code or "")
 
     def __str__(self) -> str:

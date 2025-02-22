@@ -31,7 +31,7 @@ Command line access to the rentry API.
         - Can't start with "m:" as that is reserved for modify codes.
         - If not provided, a random edit code will be generated.
     - Optional: --metadata
-        - A JSON string containing "string": "string" key-value pairs.
+        - A JSON string containing '{"string": "string"}' key-value pairs.
 - delete: Delete a page you have the edit code for.
     - Required: --page-id
     - Required: --edit-code
