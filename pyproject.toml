@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rentry.py"
-version = "0.1.0"
+version = "0.1.1"
 description = "A python wrapper for the rentry markdown service."
 authors = ["Etorix <admin@etorix.dev>"]
 packages = [{include = "rentry"}]
