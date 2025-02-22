@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "rentry.py"
+version = "0.1.0-dev"
+description = "A python wrapper for the rentry markdown service."
+authors = ["Etorix <admin@etorix.dev>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://pypi.org/project/rentry.py/"
+repository = "https://github.com/EtorixDev/rentry.py/"
+keywords = ["rentry", "markdown", "api", "wrapper"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13"
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+httpx = "^0.28.1"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.9.6"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 320
