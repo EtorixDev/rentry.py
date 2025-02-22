@@ -81,5 +81,3 @@ class RentryNonExistentPageError(RentryError):
         default_message = "That page does not exist."
         message = message or default_message
         super().__init__(message)
-
-
