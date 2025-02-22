@@ -1317,7 +1317,7 @@ class RentryPageMetadata:
         if self._SECRET_EMAIL_ADDRESS:
             if len(self._SECRET_EMAIL_ADDRESS) > 300:
                 errors.append("SECRET_EMAIL_ADDRESS must be 300 characters or less.")
-            if not EMAIL_REGEX.match(self._SECRET_EMAIL_ADDRESS):
+            if not EMAIL_REGEX.match(self._SECRET_EMAIL_ADDRESS) and not self._SECRET_EMAIL_ADDRESS.startswith("||"):
                 errors.append("SECRET_EMAIL_ADDRESS must be a valid email address.")
         if self._CONTAINER_PADDING:
             errors.extend(self._check_css_size("CONTAINER_PADDING", self._CONTAINER_PADDING, 4, 64, [], (0, 40, 0), (0, 40, 0), (0, 25, 3), (0, 15, 4), (0, 20, 4), (0, 7, 4)))
