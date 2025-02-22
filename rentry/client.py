@@ -238,7 +238,7 @@ class RentrySyncClient(RentryBase):
     - user_agent: `Optional[str] = None` — The User-Agent to be sent with every request to identify the client.
         - Appended in parentheses to the default User-Agent which consists of the package name and version.
     - use_session: `bool = True` — Whether to use the same CSRF token between requests.
-        - If false, the session details will be refreshed before every request.
+        - If False, the session details will be refreshed before every request.
         - This will double the number of requests made to the rentry API.
         - Manually refresh the session with `refresh_session()`.
 
@@ -400,7 +400,7 @@ class RentrySyncClient(RentryBase):
         - metadata: `Optional[RentryPageMetadata] = None` — The metadata for the page.
             - If not provided, no custom metadata will be set.
         - fetch: `bool = False` — Whether to automatically fetch the page data after creation.
-            - If false, the extended details such as the exact creation date will not be available until you manually fetch the page.
+            - If False, the extended details such as the exact creation date will not be available until you manually fetch the page.
 
         #### Returns
         - `RentrySyncPage` — The page object with the URL, edit code, markdown content, metadata, and optionally all of the extra data for that page.
@@ -415,16 +415,22 @@ class RentrySyncClient(RentryBase):
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        edit_code = self._verify_edit_code(edit_code) if edit_code else ""
-        page_id = self._verify_page_id(page_id) if page_id else ""
+        edit_code = self._verify_edit_code(edit_code) if edit_code else None
+        page_id = self._verify_page_id(page_id) if page_id else None
         markdown = self._verify_markdown(markdown)
-        payload: dict = {**self.payload, "text": markdown, "edit_code": edit_code, "url": page_id, "metadata": metadata.encode() if metadata else ""}
+        payload: dict = {**self.payload, "text": markdown}
+        if edit_code:
+            payload["edit_code"] = edit_code
+        if page_id:
+            payload["url"] = page_id
+        if metadata:
+            payload["metadata"] = metadata.encode()
         response: dict[str, str] = self._decipher_new(self._get_response("POST", "/api/new", payload))
         page_id = response["url"]
         edit_code = response["edit_code"]
         return self.fetch(page_id, edit_code) if fetch else RentrySyncPage(self, page_id, markdown, edit_code, metadata=metadata)
 
-    def update(self, page_id: str, edit_code: str, new_page_id: Optional[str], new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite_metadata: bool = False, fetch: bool = False) -> RentrySyncPage:
+    def update(self, page_id: str, edit_code: str, new_page_id: Optional[str], new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite: bool = False, fetch: bool = False) -> RentrySyncPage:
         """---
         Update a page you have the edit code for. You may also provide a modify code if you have one.
 
@@ -435,6 +441,7 @@ class RentrySyncClient(RentryBase):
         - new_page_id: `Optional[str] = None` — The new ID of the page.
             - Must be between 2 and 100 characters.
             - Must contain only latin letters, numbers, underscores and hyphens.
+            - Will cause `new_modify_code` to reset.
         - new_edit_code: `Optional[str] = None` — The new edit code for the page.
             - Must be between 1 and 100 characters.
             - Can't start with "m:" as that is reserved for modify codes.
@@ -444,13 +451,17 @@ class RentrySyncClient(RentryBase):
             - Provide "m:" to remove the modify code.
         - markdown: `Optional[str] = None` — The new markdown content of the page.
             - Must be between 1 and 200,000 characters.
-            - If not provided, the markdown content will be cleared.
         - metadata: `Optional[RentryPageMetadata] = None` — The new metadata for the page.
             - If not provided, no custom metadata will be set.
-        - overwrite_metadata: `bool = False` — Whether to overwrite the existing metadata with the new metadata.
-            - If false, the new metadata will be merged with the existing metadata.
+        - overwrite: `bool = False` — Whether to overwrite the existing markdown and metadata with the new values.
+            - If False:
+                - The new metadata will be merged with the existing metadata.
+                - The new markdown content will overwrite the existing content if provided, otherwise it will be left unchanged.
+            - If True:
+                - The new metadata will replace the existing metadata.
+                - The new markdown content will overwrite the existing content if provided, otherwise it will be cleared.
         - fetch: `bool = False` — Whether to automatically fetch the page data after updating.
-            - If false, the extended details such as the exact creation date will not be available until you manually fetch the page.
+            - If False, the extended details such as the exact creation date will not be available until you manually fetch the page.
 
         #### Returns
         - `RentrySyncPage` — The page object with the URL, edit code, markdown content, metadata, and optionally all of the extra data for that page.
@@ -469,12 +480,14 @@ class RentrySyncClient(RentryBase):
         if is_modify_code and (new_edit_code or new_modify_code):
             raise RentryInvalidEditCodeError("Modify codes can't be used to change the edit or modify codes.")
         edit_code = self._verify_edit_code(edit_code) if not is_modify_code else self._verify_modify_code(edit_code)
-        new_page_id = self._verify_page_id(new_page_id) if new_page_id else ""
-        new_edit_code = self._verify_edit_code(new_edit_code) if new_edit_code else ""
-        new_modify_code = self._verify_modify_code(new_modify_code) if new_modify_code else ""
+        new_page_id = self._verify_page_id(new_page_id) if new_page_id else None
+        new_edit_code = self._verify_edit_code(new_edit_code) if new_edit_code else None
+        new_modify_code = self._verify_modify_code(new_modify_code) if new_modify_code else None
         page_id = self._verify_page_id(page_id)
-        markdown = self._verify_markdown(markdown, True) if markdown is not None else ""
+        markdown = self._verify_markdown(markdown, True) if markdown is not None else None
         payload: dict = {**self.payload, "edit_code": edit_code}
+        if new_page_id:
+            payload["new_url"] = new_page_id
         if new_edit_code:
             payload["new_edit_code"] = new_edit_code
         if new_modify_code:
@@ -483,10 +496,16 @@ class RentrySyncClient(RentryBase):
             payload["text"] = markdown
         if metadata:
             payload["metadata"] = metadata.encode()
-        if not overwrite_metadata:
+        if not overwrite:
             payload["update_mode"] = "upsert"
         self._decipher_update(self._get_response("POST", f"/api/edit/{page_id}", payload))
-        return self.fetch(new_page_id or page_id, new_edit_code or edit_code) if fetch else RentrySyncPage(self, page_id, markdown, new_edit_code or edit_code, new_modify_code, metadata)
+        if fetch:
+            updated_page: RentrySyncPage = self.fetch(new_page_id or page_id, new_edit_code or edit_code)
+            updated_page.modify_code = new_modify_code if new_modify_code and not new_page_id else None
+        else:
+            updated_page: RentrySyncPage = RentrySyncPage(self, new_page_id or page_id, markdown, new_edit_code or edit_code, new_modify_code, metadata)
+            updated_page.modify_code = None if new_page_id else new_modify_code
+        return updated_page
 
     def delete(self, page_id: str, edit_code: str) -> RentrySyncPage:
         """---
@@ -638,7 +657,7 @@ class RentrySyncPage:
 
         #### Arguments
         - fetch: `bool = False` — Whether to automatically fetch the page data after creation.
-            - If false, the extended details such as the exact creation date will not be available until you manually fetch the page.
+            - If False, the extended details such as the exact creation date will not be available until you manually fetch the page.
 
         #### Updates
         - This page object with the most recent data.
@@ -655,10 +674,12 @@ class RentrySyncPage:
 
         page: RentrySyncPage = self.client.create(self.markdown or "", self.page_id, self.edit_code, self.metadata, fetch)
         self.edit_code = page.edit_code
-        self.modify_code = page.modify_code
+        self.modify_code = None
+        self.markdown = page.markdown
+        self.metadata = page.metadata
         self.stats = page.stats
 
-    def update(self, new_page_id: Optional[str] = None, new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite_metadata: bool = False, fetch: bool = False) -> None:
+    def update(self, new_page_id: Optional[str] = None, new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite: bool = False, fetch: bool = False) -> None:
         """---
         Update the page if the edit or modify code is set. Modify codes do not allow updating the edit or modify codes or deleting the page.
 
@@ -675,13 +696,17 @@ class RentrySyncPage:
             - Provide "m:" to remove the modify code.
         - markdown: `Optional[str] = None` — The new markdown content of the page.
             - Must be between 1 and 200,000 characters.
-            - If not provided, the contents of the `markdown` attribute will be used.
         - metadata: `Optional[RentryPageMetadata] = None` — The new metadata for the page.
             - If not provided, the contents of the `metadata` attribute will be used.
-        - overwrite_metadata: `bool = False` — Whether to overwrite the existing metadata with the new metadata.
-            - If false, the new metadata will be merged with the existing metadata.
+        - overwrite: `bool = False` — Whether to overwrite the existing markdown and metadata with the new values.
+            - If False:
+                - The new metadata will be merged with the existing metadata.
+                - The new markdown content will overwrite the existing content if provided, otherwise it will be left unchanged.
+            - If True:
+                - The new metadata will replace the existing metadata.
+                - The new markdown content will overwrite the existing content if provided, otherwise it will be cleared.
         - fetch: `bool = False` — Whether to automatically fetch the page data after updating.
-            - If false, the extended details such as the exact creation date will not be available until you manually fetch the page.
+            - If False, the extended details such as the exact creation date will not be available until you manually fetch the page.
 
         #### Updates
         - This page with whatever is provided.
@@ -696,7 +721,8 @@ class RentrySyncPage:
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        page: RentrySyncPage = self.client.update(self.page_id, self.edit_code or "", new_page_id, new_edit_code, new_modify_code, markdown or self.markdown, metadata or self.metadata, overwrite_metadata, fetch)
+        page: RentrySyncPage = self.client.update(self.page_id, self.edit_code or "", new_page_id, new_edit_code, new_modify_code, markdown, metadata, overwrite, fetch)
+        self.page_id = page.page_id
         self.edit_code = page.edit_code
         self.modify_code = page.modify_code
         self.markdown = page.markdown
@@ -745,7 +771,7 @@ class RentryAsyncClient(RentryBase):
     - user_agent: `Optional[str] = None` — The User-Agent to be sent with every request to identify the client.
         - Appended in parentheses to the default User-Agent which consists of the package name and version.
     - use_session: `bool = True` — Whether to use the same CSRF token between requests.
-        - If false, the session details will be refreshed before every request.
+        - If False, the session details will be refreshed before every request.
         - This will double the number of requests made to the rentry API.
         - Manually refresh the session with `refresh_session()`.
 
@@ -908,7 +934,7 @@ class RentryAsyncClient(RentryBase):
         - metadata: `Optional[RentryPageMetadata] = None` — The metadata for the page.
             - If not provided, no custom metadata will be set.
         - fetch: `bool = False` — Whether to automatically fetch the page data after creation.
-            - If false, the extended details such as the exact creation date will not be available until you manually fetch the page.
+            - If False, the extended details such as the exact creation date will not be available until you manually fetch the page.
 
         #### Returns
         - `RentryAsyncPage` — The page object with the URL, edit code, markdown content, metadata, and optionally all of the extra data for that page.
@@ -923,16 +949,22 @@ class RentryAsyncClient(RentryBase):
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        edit_code = self._verify_edit_code(edit_code) if edit_code else ""
-        page_id = self._verify_page_id(page_id) if page_id else ""
+        edit_code = self._verify_edit_code(edit_code) if edit_code else None
+        page_id = self._verify_page_id(page_id) if page_id else None
         markdown = self._verify_markdown(markdown)
-        payload: dict = {**self.payload, "text": markdown, "edit_code": edit_code, "url": page_id, "metadata": metadata.encode() if metadata else ""}
+        payload: dict = {**self.payload, "text": markdown}
+        if edit_code:
+            payload["edit_code"] = edit_code
+        if page_id:
+            payload["url"] = page_id
+        if metadata:
+            payload["metadata"] = metadata.encode()
         response: dict[str, str] = self._decipher_new(await self._get_response("POST", "/api/new", payload))
         page_id = response["url"]
         edit_code = response["edit_code"]
         return await self.fetch(page_id, edit_code) if fetch else RentryAsyncPage(self, page_id, markdown, edit_code, metadata=metadata)
 
-    async def update(self, page_id: str, edit_code: str, new_page_id: Optional[str], new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite_metadata: bool = False, fetch: bool = False) -> RentryAsyncPage:
+    async def update(self, page_id: str, edit_code: str, new_page_id: Optional[str], new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite: bool = False, fetch: bool = False) -> RentryAsyncPage:
         """---
         Update a page you have the edit code for. You may also provide a modify code if you have one.
 
@@ -943,6 +975,7 @@ class RentryAsyncClient(RentryBase):
         - new_page_id: `Optional[str] = None` — The new ID of the page.
             - Must be between 2 and 100 characters.
             - Must contain only latin letters, numbers, underscores and hyphens.
+            - Will cause `new_modify_code` to reset.
         - new_edit_code: `Optional[str] = None` — The new edit code for the page.
             - Must be between 1 and 100 characters.
             - Can't start with "m:" as that is reserved for modify codes.
@@ -952,13 +985,17 @@ class RentryAsyncClient(RentryBase):
             - Provide "m:" to remove the modify code.
         - markdown: `Optional[str] = None` — The new markdown content of the page.
             - Must be between 1 and 200,000 characters.
-            - If not provided, the markdown content will be cleared.
         - metadata: `Optional[RentryPageMetadata] = None` — The new metadata for the page.
             - If not provided, no custom metadata will be set.
-        - overwrite_metadata: `bool = False` — Whether to overwrite the existing metadata with the new metadata.
-            - If false, the new metadata will be merged with the existing metadata.
+        - overwrite: `bool = False` — Whether to overwrite the existing markdown and metadata with the new values.
+            - If False:
+                - The new metadata will be merged with the existing metadata.
+                - The new markdown content will overwrite the existing content if provided, otherwise it will be left unchanged.
+            - If True:
+                - The new metadata will replace the existing metadata.
+                - The new markdown content will overwrite the existing content if provided, otherwise it will be cleared.
         - fetch: `bool = False` — Whether to automatically fetch the page data after updating.
-            - If false, the extended details such as the exact creation date will not be available until you manually fetch the page.
+            - If False, the extended details such as the exact creation date will not be available until you manually fetch the page.
 
         #### Returns
         - `RentryAsyncPage` — The page object with the URL, edit code, markdown content, metadata, and optionally all of the extra data for that page.
@@ -977,12 +1014,14 @@ class RentryAsyncClient(RentryBase):
         if is_modify_code and (new_edit_code or new_modify_code):
             raise RentryInvalidEditCodeError("Modify codes can't be used to change the edit or modify codes.")
         edit_code = self._verify_edit_code(edit_code) if not is_modify_code else self._verify_modify_code(edit_code)
-        new_page_id = self._verify_page_id(new_page_id) if new_page_id else ""
-        new_edit_code = self._verify_edit_code(new_edit_code) if new_edit_code else ""
-        new_modify_code = self._verify_modify_code(new_modify_code) if new_modify_code else ""
+        new_page_id = self._verify_page_id(new_page_id) if new_page_id else None
+        new_edit_code = self._verify_edit_code(new_edit_code) if new_edit_code else None
+        new_modify_code = self._verify_modify_code(new_modify_code) if new_modify_code else None
         page_id = self._verify_page_id(page_id)
-        markdown = self._verify_markdown(markdown, True) if markdown is not None else ""
+        markdown = self._verify_markdown(markdown, True) if markdown is not None else None
         payload: dict = {**self.payload, "edit_code": edit_code}
+        if new_page_id:
+            payload["new_url"] = new_page_id
         if new_edit_code:
             payload["new_edit_code"] = new_edit_code
         if new_modify_code:
@@ -991,10 +1030,16 @@ class RentryAsyncClient(RentryBase):
             payload["text"] = markdown
         if metadata:
             payload["metadata"] = metadata.encode()
-        if not overwrite_metadata:
+        if not overwrite:
             payload["update_mode"] = "upsert"
         self._decipher_update(await self._get_response("POST", f"/api/edit/{page_id}", payload))
-        return await self.fetch(new_page_id or page_id, new_edit_code or edit_code) if fetch else RentryAsyncPage(self, page_id, markdown, new_edit_code or edit_code, new_modify_code, metadata)
+        if fetch:
+            updated_page: RentryAsyncPage = await self.fetch(new_page_id or page_id, new_edit_code or edit_code)
+            updated_page.modify_code = new_modify_code if new_modify_code and not new_page_id else None
+        else:
+            updated_page: RentryAsyncPage = RentryAsyncPage(self, new_page_id or page_id, markdown, new_edit_code or edit_code, new_modify_code, metadata)
+            updated_page.modify_code = None if new_page_id else new_modify_code
+        return updated_page
 
     async def delete(self, page_id: str, edit_code: str) -> RentryAsyncPage:
         """---
@@ -1146,7 +1191,7 @@ class RentryAsyncPage:
 
         #### Arguments
         - fetch: `bool = False` — Whether to automatically fetch the page data after creation.
-            - If false, the extended details such as the exact creation date will not be available until you manually fetch the page.
+            - If False, the extended details such as the exact creation date will not be available until you manually fetch the page.
 
         #### Updates
         - This page object with the most recent data.
@@ -1163,10 +1208,12 @@ class RentryAsyncPage:
 
         page: RentryAsyncPage = await self.client.create(self.markdown or "", self.page_id, self.edit_code, self.metadata, fetch)
         self.edit_code = page.edit_code
-        self.modify_code = page.modify_code
+        self.modify_code = None
+        self.markdown = page.markdown
+        self.metadata = page.metadata
         self.stats = page.stats
 
-    async def update(self, new_page_id: Optional[str] = None, new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite_metadata: bool = False, fetch: bool = False) -> None:
+    async def update(self, new_page_id: Optional[str] = None, new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite: bool = False, fetch: bool = False) -> None:
         """---
         Update the page if the edit or modify code is set. Modify codes do not allow updating the edit or modify codes or deleting the page.
 
@@ -1183,13 +1230,17 @@ class RentryAsyncPage:
             - Provide "m:" to remove the modify code.
         - markdown: `Optional[str] = None` — The new markdown content of the page.
             - Must be between 1 and 200,000 characters.
-            - If not provided, the contents of the `markdown` attribute will be used.
         - metadata: `Optional[RentryPageMetadata] = None` — The new metadata for the page.
             - If not provided, the contents of the `metadata` attribute will be used.
-        - overwrite_metadata: `bool = False` — Whether to overwrite the existing metadata with the new metadata.
-            - If false, the new metadata will be merged with the existing metadata.
+        - overwrite: `bool = False` — Whether to overwrite the existing markdown and metadata with the new values.
+            - If False:
+                - The new metadata will be merged with the existing metadata.
+                - The new markdown content will overwrite the existing content if provided, otherwise it will be left unchanged.
+            - If True:
+                - The new metadata will replace the existing metadata.
+                - The new markdown content will overwrite the existing content if provided, otherwise it will be cleared.
         - fetch: `bool = False` — Whether to automatically fetch the page data after updating.
-            - If false, the extended details such as the exact creation date will not be available until you manually fetch the page.
+            - If False, the extended details such as the exact creation date will not be available until you manually fetch the page.
 
         #### Updates
         - This page with whatever is provided.
@@ -1204,7 +1255,8 @@ class RentryAsyncPage:
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        page: RentryAsyncPage = await self.client.update(self.page_id, self.edit_code or "", new_page_id, new_edit_code, new_modify_code, markdown or self.markdown, metadata or self.metadata, overwrite_metadata, fetch)
+        page: RentryAsyncPage = await self.client.update(self.page_id, self.edit_code or "", new_page_id, new_edit_code, new_modify_code, markdown, metadata, overwrite, fetch)
+        self.page_id = page.page_id
         self.edit_code = page.edit_code
         self.modify_code = page.modify_code
         self.markdown = page.markdown

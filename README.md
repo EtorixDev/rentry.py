@@ -22,7 +22,7 @@ poetry add rentry.py
 ```
 
 ## Command Line
-The command interface offers every endpoint available other than `update`. This is due to the fact the `update` endpoint will clear the page content if no value is passed for it. For extremely small pages this may be fine, but for the majority that would require an extremely complex terminal command to prevent the page content from being wiped.
+The command interface offers every endpoint available other than `update`. The `update` endpoint will be added in a following release.
 
 ### Commands
 - help: Show this help message.
