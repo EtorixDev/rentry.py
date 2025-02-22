@@ -246,7 +246,7 @@ class RentrySyncClient(RentryBase):
     - `read()` — Get the raw content of a page.
         - Only available for pages with a `SECRET_RAW_ACCESS_CODE` set or for any page if you provide an `auth_token`.
         - Returns the plain text markdown content of the page.
-    - `fetch()` — Fetch a page.
+    - `fetch()` — Fetch the data for a page.
         - Returns a page object with all the data for that page.
     - `exists()` — Check if a page exists.
         - Returns a boolean indicating whether the page exists.
@@ -297,8 +297,6 @@ class RentrySyncClient(RentryBase):
 
         #### Arguments
         - page_id: `str` — The page to get the raw content of.
-            - Must be between 2 and 100 characters.
-            - Must contain only latin letters, numbers, underscores and hyphens.
 
         #### Returns
         - `str` — The raw content of the page.
@@ -316,14 +314,12 @@ class RentrySyncClient(RentryBase):
 
     def fetch(self, page_id: str, edit_code: str) -> RentrySyncPage:
         """---
-        Fetch a page you have the edit code for.
+        Fetch the data for a page you have the edit code for.
 
         #### Arguments
         - page_id: `str` — The page to fetch.
-            - Must be between 2 and 100 characters.
-            - Must contain only latin letters, numbers, underscores and hyphens.
         - edit_code: `str` — The edit code for the page.
-            - Must be between 1 and 100 characters.
+            - May be a modify code instead. Modify codes start with "m:" and do not allow updating the edit or modify codes or deleting the page.
 
         #### Returns
         - `RentrySyncPage` — The page object with all the data for that page.
@@ -336,7 +332,8 @@ class RentrySyncClient(RentryBase):
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        edit_code = self._verify_edit_code(edit_code)
+        is_modify_code: bool = edit_code.lower().startswith("m:")
+        edit_code = self._verify_edit_code(edit_code) if not is_modify_code else self._verify_modify_code(edit_code)
         page_id = self._verify_page_id(page_id)
         payload: dict = {**self.payload, "edit_code": edit_code}
         response: dict = self._decipher_fetch(self._get_response("POST", f"/api/fetch/{page_id}", payload))
@@ -372,8 +369,6 @@ class RentrySyncClient(RentryBase):
 
         #### Arguments
         - page_id: `str` — The page to check the existence of.
-            - Must be between 2 and 100 characters.
-            - Must contain only latin letters, numbers, underscores and hyphens.
 
         #### Returns
         - `bool` — Whether the page exists.
@@ -429,16 +424,17 @@ class RentrySyncClient(RentryBase):
         edit_code = response["edit_code"]
         return self.fetch(page_id, edit_code) if fetch else RentrySyncPage(self, page_id, markdown, edit_code, metadata=metadata)
 
-    def update(self, page_id: str, edit_code: str, new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite_metadata: bool = False, fetch: bool = False) -> RentrySyncPage:
+    def update(self, page_id: str, edit_code: str, new_page_id: Optional[str], new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite_metadata: bool = False, fetch: bool = False) -> RentrySyncPage:
         """---
         Update a page you have the edit code for. You may also provide a modify code if you have one.
 
         #### Arguments
         - page_id: `str` — The page to update.
+        - edit_code: `str` — The edit code for the page.
+            - May be a modify code instead. Modify codes start with "m:" and do not allow updating the edit or modify codes or deleting the page.
+        - new_page_id: `Optional[str] = None` — The new ID of the page.
             - Must be between 2 and 100 characters.
             - Must contain only latin letters, numbers, underscores and hyphens.
-        - edit_code: `str` — The edit code for the page.
-            - May be a modify code instead. Modify codes start with "m:" and do not allow for changing the edit or modify codes.
         - new_edit_code: `Optional[str] = None` — The new edit code for the page.
             - Must be between 1 and 100 characters.
             - Can't start with "m:" as that is reserved for modify codes.
@@ -469,10 +465,10 @@ class RentrySyncClient(RentryBase):
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        if_modify_code: bool = edit_code.lower().startswith("m:")
-        if if_modify_code and (new_edit_code or new_modify_code):
+        is_modify_code: bool = edit_code.lower().startswith("m:")
+        if is_modify_code and (new_edit_code or new_modify_code):
             raise RentryInvalidEditCodeError("Modify codes can't be used to change the edit or modify codes.")
-        edit_code = self._verify_edit_code(edit_code) if not if_modify_code else self._verify_modify_code(edit_code)
+        edit_code = self._verify_edit_code(edit_code) if not is_modify_code else self._verify_modify_code(edit_code)
         new_edit_code = self._verify_edit_code(new_edit_code) if new_edit_code else ""
         new_modify_code = self._verify_modify_code(new_modify_code) if new_modify_code else ""
         page_id = self._verify_page_id(page_id)
@@ -491,19 +487,16 @@ class RentrySyncClient(RentryBase):
         self._decipher_update(self._get_response("POST", f"/api/edit/{page_id}", payload))
         return self.fetch(page_id, new_edit_code or edit_code) if fetch else RentrySyncPage(self, page_id, markdown, new_edit_code or edit_code, new_modify_code, metadata)
 
-    def delete(self, page_id: str, edit_code: str) -> bool:
+    def delete(self, page_id: str, edit_code: str) -> RentrySyncPage:
         """---
         Delete a page you have the edit code for.
 
         #### Arguments
         - page_id: `str` — The page to delete.
-            - Must be between 2 and 100 characters.
-            - Must contain only latin letters, numbers, underscores and hyphens.
         - edit_code: `str` — The edit code for the page.
-            - Must be between 1 and 100 characters.
 
         #### Returns
-        - `bool` — True if the page was deleted successfully. An exception is raised otherwise.
+        - `RentrySyncPage` — An empty page object with the page ID set.
 
         #### Raises
         - `RentryInvalidPageURLError` when the page URL is invalid.
@@ -516,8 +509,8 @@ class RentrySyncClient(RentryBase):
         edit_code = self._verify_edit_code(edit_code)
         page_id = self._verify_page_id(page_id)
         payload: dict = {**self.payload, "edit_code": edit_code}
-        response: bool = self._decipher_delete(self._get_response("POST", f"/api/delete/{page_id}", payload))
-        return response
+        self._decipher_delete(self._get_response("POST", f"/api/delete/{page_id}", payload))
+        return RentrySyncPage(self, page_id)
 
     def __str__(self) -> str:
         return self.base_url
@@ -547,7 +540,7 @@ class RentrySyncPage:
     - `read()` — Get the raw content of the page.
         - Only available for pages with a `SECRET_RAW_ACCESS_CODE` set or for any page if you provide an `auth_token`.
         - Returns the plain text markdown content of the page.
-    - `fetch()` — Fetch the page.
+    - `fetch()` — Fetch the data for a page.
         - Will update this page object with the most recent data.
     - `exists()` — Check if the page exists.
         - Returns a boolean indicating whether the page exists.
@@ -603,7 +596,7 @@ class RentrySyncPage:
 
     def fetch(self) -> None:
         """---
-        Fetch the page if the edit code is set.
+        Fetch the data of the page if the edit code is set.
 
         #### Updates
         - This page object with the most recent data.
@@ -618,7 +611,7 @@ class RentrySyncPage:
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        page: RentrySyncPage = self.client.fetch(self.page_id, self.edit_code or "")
+        page: RentrySyncPage = self.client.fetch(self.page_id, self.edit_code or self.modify_code or "")
         self.markdown = page.markdown
         self.edit_code = page.edit_code
         self.modify_code = None if page.stats and not page.stats.modify_code_set else self.modify_code
@@ -664,11 +657,14 @@ class RentrySyncPage:
         self.modify_code = page.modify_code
         self.stats = page.stats
 
-    def update(self, new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite_metadata: bool = False, fetch: bool = False) -> None:
+    def update(self, new_page_id: Optional[str] = None, new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite_metadata: bool = False, fetch: bool = False) -> None:
         """---
-        Update the page if the edit or modify code is set. Modify codes do not allow for changing the edit or modify codes.
+        Update the page if the edit or modify code is set. Modify codes do not allow updating the edit or modify codes or deleting the page.
 
         #### Arguments
+        - new_page_id: `Optional[str] = None` — The new ID of the page.
+            - Must be between 2 and 100 characters.
+            - Must contain only latin letters, numbers, underscores and hyphens.
         - new_edit_code: `Optional[str] = None` — The new edit code for the page.
             - Must be between 1 and 100 characters.
             - Can't start with "m:" as that is reserved for modify codes.
@@ -699,19 +695,16 @@ class RentrySyncPage:
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        page: RentrySyncPage = self.client.update(self.page_id, self.edit_code or "", new_edit_code, new_modify_code, markdown or self.markdown, metadata or self.metadata, overwrite_metadata, fetch)
+        page: RentrySyncPage = self.client.update(self.page_id, self.edit_code or "", new_page_id, new_edit_code, new_modify_code, markdown or self.markdown, metadata or self.metadata, overwrite_metadata, fetch)
         self.edit_code = page.edit_code
         self.modify_code = page.modify_code
         self.markdown = page.markdown
         self.metadata = page.metadata
         self.stats = page.stats
 
-    def delete(self) -> bool:
+    def delete(self) -> None:
         """---
-        Delete the page if the edit code is set.
-
-        #### Returns
-        - `bool` — True if the page was deleted successfully. An exception is raised otherwise.
+        Delete the page if the edit code is set. The only attribute that is cleared is `stats`.
 
         #### Raises
         - `RentryInvalidPageURLError` when the page URL is invalid.
@@ -722,7 +715,7 @@ class RentrySyncPage:
         """
 
         self.stats = None
-        return self.client.delete(self.page_id, self.edit_code or "")
+        self.client.delete(self.page_id, self.edit_code or "")
 
     def __str__(self) -> str:
         return self.page_url
@@ -759,7 +752,7 @@ class RentryAsyncClient(RentryBase):
     - `read()` — Get the raw content of a page.
         - Only available for pages with a `SECRET_RAW_ACCESS_CODE` set or for any page if you provide an `auth_token`.
         - Returns the plain text markdown content of the page.
-    - `fetch()` — Fetch a page.
+    - `fetch()` — Fetch the data for a page.
         - Returns a page object with all the data for that page.
     - `exists()` — Check if a page exists.
         - Returns a boolean indicating whether the page exists.
@@ -811,8 +804,6 @@ class RentryAsyncClient(RentryBase):
 
         #### Arguments
         - page_id: `str` — The page to get the raw content of.
-            - Must be between 2 and 100 characters.
-            - Must contain only latin letters, numbers, underscores and hyphens.
 
         #### Returns
         - `str` — The raw content of the page.
@@ -830,14 +821,12 @@ class RentryAsyncClient(RentryBase):
 
     async def fetch(self, page_id: str, edit_code: str) -> RentryAsyncPage:
         """---
-        Fetch a page you have the edit code for.
+        Fetch the data for a page you have the edit code for.
 
         #### Arguments
         - page_id: `str` — The page to fetch.
-            - Must be between 2 and 100 characters.
-            - Must contain only latin letters, numbers, underscores and hyphens.
         - edit_code: `str` — The edit code for the page.
-            - Must be between 1 and 100 characters.
+            - May be a modify code instead. Modify codes start with "m:" and do not allow updating the edit or modify codes or deleting the page.
 
         #### Returns
         - `RentryAsyncPage` — The page object with all the data for that page.
@@ -850,7 +839,8 @@ class RentryAsyncClient(RentryBase):
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        edit_code = self._verify_edit_code(edit_code)
+        is_modify_code: bool = edit_code.lower().startswith("m:")
+        edit_code = self._verify_edit_code(edit_code) if not is_modify_code else self._verify_modify_code(edit_code)
         page_id = self._verify_page_id(page_id)
         payload: dict = {**self.payload, "edit_code": edit_code}
         response: dict = self._decipher_fetch(await self._get_response("POST", f"/api/fetch/{page_id}", payload))
@@ -886,8 +876,6 @@ class RentryAsyncClient(RentryBase):
 
         #### Arguments
         - page_id: `str` — The page to check the existence of.
-            - Must be between 2 and 100 characters.
-            - Must contain only latin letters, numbers, underscores and hyphens.
 
         #### Returns
         - `bool` — Whether the page exists.
@@ -949,10 +937,8 @@ class RentryAsyncClient(RentryBase):
 
         #### Arguments
         - page_id: `str` — The page to update.
-            - Must be between 2 and 100 characters.
-            - Must contain only latin letters, numbers, underscores and hyphens.
         - edit_code: `str` — The edit code for the page.
-            - May be a modify code instead. Modify codes start with "m:" and do not allow for changing the edit or modify codes.
+            - May be a modify code instead. Modify codes start with "m:" and do not allow updating the edit or modify codes or deleting the page.
         - new_edit_code: `Optional[str] = None` — The new edit code for the page.
             - Must be between 1 and 100 characters.
             - Can't start with "m:" as that is reserved for modify codes.
@@ -983,10 +969,10 @@ class RentryAsyncClient(RentryBase):
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        if_modify_code: bool = edit_code.lower().startswith("m:")
-        if if_modify_code and (new_edit_code or new_modify_code):
+        is_modify_code: bool = edit_code.lower().startswith("m:")
+        if is_modify_code and (new_edit_code or new_modify_code):
             raise RentryInvalidEditCodeError("Modify codes can't be used to change the edit or modify codes.")
-        edit_code = self._verify_edit_code(edit_code) if not if_modify_code else self._verify_modify_code(edit_code)
+        edit_code = self._verify_edit_code(edit_code) if not is_modify_code else self._verify_modify_code(edit_code)
         new_edit_code = self._verify_edit_code(new_edit_code) if new_edit_code else ""
         new_modify_code = self._verify_modify_code(new_modify_code) if new_modify_code else ""
         page_id = self._verify_page_id(page_id)
@@ -1005,19 +991,16 @@ class RentryAsyncClient(RentryBase):
         self._decipher_update(await self._get_response("POST", f"/api/edit/{page_id}", payload))
         return await self.fetch(page_id, new_edit_code or edit_code) if fetch else RentryAsyncPage(self, page_id, markdown, new_edit_code or edit_code, new_modify_code, metadata)
 
-    async def delete(self, page_id: str, edit_code: str) -> bool:
+    async def delete(self, page_id: str, edit_code: str) -> RentryAsyncPage:
         """---
         Delete a page you have the edit code for.
 
         #### Arguments
         - page_id: `str` — The page to delete.
-            - Must be between 2 and 100 characters.
-            - Must contain only latin letters, numbers, underscores and hyphens.
         - edit_code: `str` — The edit code for the page.
-            - Must be between 1 and 100 characters.
 
         #### Returns
-        - `bool` — True if the page was deleted successfully. An exception is raised otherwise.
+        - `RentryAsyncPage` — An empty page object with the page ID set.
 
         #### Raises
         - `RentryInvalidPageURLError` when the page URL is invalid.
@@ -1030,8 +1013,8 @@ class RentryAsyncClient(RentryBase):
         edit_code = self._verify_edit_code(edit_code)
         page_id = self._verify_page_id(page_id)
         payload: dict = {**self.payload, "edit_code": edit_code}
-        response: bool = self._decipher_delete(await self._get_response("POST", f"/api/delete/{page_id}", payload))
-        return response
+        self._decipher_delete(await self._get_response("POST", f"/api/delete/{page_id}", payload))
+        return RentryAsyncPage(self, page_id)
 
     def __str__(self) -> str:
         return self.base_url
@@ -1061,7 +1044,7 @@ class RentryAsyncPage:
     - `read()` — Get the raw content of the page.
         - Only available for pages with a `SECRET_RAW_ACCESS_CODE` set or for any page if you provide an `auth_token`.
         - Returns the plain text markdown content of the page.
-    - `fetch()` — Fetch the page.
+    - `fetch()` — Fetch the data for a page.
         - Will update this page object with the most recent data.
     - `exists()` — Check if the page exists.
         - Returns a boolean indicating whether the page exists.
@@ -1117,7 +1100,7 @@ class RentryAsyncPage:
 
     async def fetch(self) -> None:
         """---
-        Fetch the page if the edit code is set.
+        Fetch the data of the page if the edit code is set.
 
         #### Updates
         - This page object with the most recent data.
@@ -1132,7 +1115,7 @@ class RentryAsyncPage:
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        page: RentryAsyncPage = await self.client.fetch(self.page_id, self.edit_code or "")
+        page: RentryAsyncPage = await self.client.fetch(self.page_id, self.edit_code or self.modify_code or "")
         self.markdown = page.markdown
         self.edit_code = page.edit_code
         self.modify_code = None if page.stats and not page.stats.modify_code_set else self.modify_code
@@ -1180,7 +1163,7 @@ class RentryAsyncPage:
 
     async def update(self, new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite_metadata: bool = False, fetch: bool = False) -> None:
         """---
-        Update the page if the edit or modify code is set. Modify codes do not allow for changing the edit or modify codes.
+        Update the page if the edit or modify code is set. Modify codes do not allow updating the edit or modify codes or deleting the page.
 
         #### Arguments
         - new_edit_code: `Optional[str] = None` — The new edit code for the page.
@@ -1220,12 +1203,9 @@ class RentryAsyncPage:
         self.metadata = page.metadata
         self.stats = page.stats
 
-    async def delete(self) -> bool:
+    async def delete(self) -> None:
         """---
-        Delete the page if the edit code is set.
-
-        #### Returns
-        - `bool` — True if the page was deleted successfully. An exception is raised otherwise.
+        Delete the page if the edit code is set. The only attribute that is cleared is `stats`.
 
         #### Raises
         - `RentryInvalidPageURLError` when the page URL is invalid.
@@ -1236,7 +1216,7 @@ class RentryAsyncPage:
         """
 
         self.stats = None
-        return await self.client.delete(self.page_id, self.edit_code or "")
+        await self.client.delete(self.page_id, self.edit_code or "")
 
     def __str__(self) -> str:
         return self.page_url

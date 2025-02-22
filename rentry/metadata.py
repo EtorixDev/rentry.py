@@ -1476,7 +1476,10 @@ class RentryPageMetadata:
         - This metadata object with the decoded values.
         """
 
-        data_json: dict[str, str] = json.loads(data) if isinstance(data, str) else data
+        try:
+            data_json: dict[str, Any] = json.loads(data) if isinstance(data, str) else data
+        except json.JSONDecodeError:
+            raise RentryInvalidMetadataError("The provided data for building the metadata is not valid JSON.")
 
         for key, val in data_json.items():
             attr: str = f"_{key}"
@@ -1495,8 +1498,12 @@ class RentryPageMetadata:
         self.validate()
 
     @staticmethod
-    def build(data: str | dict[str, Any]) -> "RentryPageMetadata":
-        data_json: dict[str, str | bool] = json.loads(data) if isinstance(data, str) else data
+    def build(data: str | dict[str, Any]) -> RentryPageMetadata:
+        try:
+            data_json: dict[str, Any] = json.loads(data) if isinstance(data, str) else data
+        except json.JSONDecodeError:
+            raise RentryInvalidMetadataError("The provided data for building the metadata is not valid JSON.")
+
         metadata = RentryPageMetadata()
         metadata.decode(data_json)
         return metadata
