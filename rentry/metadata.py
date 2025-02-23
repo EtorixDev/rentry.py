@@ -1508,6 +1508,9 @@ class RentryPageMetadata:
         metadata.decode(data_json)
         return metadata
 
+    def __bool__(self) -> bool:
+        return any(val is not None for key, val in self.__dict__.items() if key.startswith("_"))
+
     def __str__(self) -> str:
         return self.encode()
 

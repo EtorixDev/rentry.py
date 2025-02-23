@@ -22,42 +22,57 @@ poetry add rentry.py
 ```
 
 ## Command Line
-The command interface offers every endpoint available other than `update`. The `update` endpoint will be added in a following release.
+The command interface offers every endpoint as terminal commands. Those commands and their arguments are detailed below.
 
 ### Commands
-- help: Show this help message.
-- read: Get the raw content of a page with a `SECRET_RAW_ACCESS_CODE` set or if you provide an `--auth-token`.
-    - Required: `--page-id`
-    - Optional: `--auth-token`
-        - Auth tokens are acquired by contacting rentry support.
-- fetch: Fetch the data for a page you have the edit code for.
-    - Required: `--page-id`
-    - Required: `--edit-code`
-- exists: Check if a page exists.
-    - Required: `--page-id`
-- create: Create a new page.
-    - Required: `--content`
-        - Must be between 1 and 200,000 characters.
-    - Optional: `--page-id`
-        - Must be between 2 and 100 characters.
-        - Must contain only latin letters, numbers, underscores and hyphens.
-        - If not provided, a random URL will be generated.
-    - Optional: `--edit-code`
-        - Must be between 1 and 100 characters.
-        - Can't start with `m:` as that is reserved for modify codes.
-        - If not provided, a random edit code will be generated.
-    - Optional: `--metadata`
-        - A JSON string containing `'{"string": "string"}'` key-value pairs.
-- delete: Delete a page you have the edit code for.
-    - Required: `--page-id`
-    - Required: `--edit-code`
+- `help`: Show this help message.
+- `read`: Get the raw markdown of a page with a `SECRET_RAW_ACCESS_CODE` set or if you provide an `--auth-token`.
+    - `rentry read <--page-id PAGE_ID> [--auth-token AUTH_TOKEN]`
+- `fetch`: Fetch the data for a page you have the edit code for.
+    - `rentry fetch <--page-id PAGE_ID> <--edit-code EDIT_CODE>`
+- `exists`: Check if a page exists.
+    - `rentry exists <--page-id PAGE_ID>`
+- `create`: Create a new page.
+    - `rentry create <--markdown MARKDOWN> [--page-id PAGE_ID] [--edit-code EDIT_CODE] [--metadata METADATA]`
+- `update`: Update a page you have the edit or modify code for.
+    - `rentry update <--page-id PAGE_ID> <--edit-code EDIT_CODE> [--new-page-id NEW_PAGE_ID] [--new-edit-code NEW_EDIT_CODE] [--new-modify-code NEW_MODIFY_CODE] [--markdown MARKDOWN] [--metadata METADATA] [--overwrite]`
+- `delete`: Delete a page you have the edit code for.
+    - `rentry delete <--page-id PAGE_ID> <--edit-code EDIT_CODE>`
+
+#### Arguments
+- `--page-id`
+- `--edit-code`
+    - When used with the `update` command this can be a modify code instead.
+    - Modify codes start with `m:` and do not allow updating the edit or modify codes or deleting the page.
+- `--auth-token`
+    - Auth tokens are acquired by contacting rentry support.
+- `--new-page-id`
+    - Must be between 2 and 100 characters.
+    - Must contain only latin letters, numbers, underscores and hyphens.
+    - Will cause the existing modify code to reset if set.
+- `--new-edit-code`
+    - Must be between 1 and 100 characters.
+    - Can't start with `m:` as that is reserved for modify codes.
+- `--new-modify-code`
+    - Must start with `m:` and be between 1 and 100 characters.
+    - Provide `m:` to remove the modify code.
+- `--markdown`
+    - Must be between 1 and 200,000 characters.
+- `--metadata`
+    - A JSON string containing `'{"string": "string"}'` key-value pairs.
+- `--overwrite`
+    - Whether to overwrite the existing markdown and metadata with the new values.
+- `--base-url`
+    - The base URL to use.
+    - Defaults to `https://rentry.co` but can be set to `https://rentry.org`.
+    - All data is shared between the two domains.
 
 ### Examples
-- rentry read --page-id py
-- rentry fetch --page-id py --edit-code pyEditCode
-- rentry exists --page-id py
-- rentry create --content "Hello, World!" --page-id py --edit-code pyEditCode
-- rentry delete --page-id py --edit-code pyEditCode
+- `rentry read --page-id py`
+- `rentry fetch --page-id py --edit-code pyEditCode`
+- `rentry exists --page-id py`
+- `rentry create --content "Hello, World!" --page-id py --edit-code pyEditCode`
+- `rentry delete --page-id py --edit-code pyEditCode --base-url "https://rentry.org"`
 
 ## Module
 ### Basic
