@@ -433,7 +433,7 @@ class RentrySyncClient(RentryBase):
         edit_code = response["edit_code"]
         return self.fetch(page_id, edit_code) if fetch else RentrySyncPage(self, page_id, markdown, edit_code, metadata=metadata)
 
-    def update(self, page_id: str, edit_code: str, new_page_id: Optional[str], new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite: bool = False, fetch: bool = False) -> RentrySyncPage:
+    def update(self, page_id: str, edit_code: str, new_page_id: Optional[str] = None, new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite: bool = False, fetch: bool = False) -> RentrySyncPage:
         """---
         Update a page you have the edit or modify code for.
 
@@ -969,7 +969,7 @@ class RentryAsyncClient(RentryBase):
         edit_code = response["edit_code"]
         return await self.fetch(page_id, edit_code) if fetch else RentryAsyncPage(self, page_id, markdown, edit_code, metadata=metadata)
 
-    async def update(self, page_id: str, edit_code: str, new_page_id: Optional[str], new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite: bool = False, fetch: bool = False) -> RentryAsyncPage:
+    async def update(self, page_id: str, edit_code: str, new_page_id: Optional[str] = None, new_edit_code: Optional[str] = None, new_modify_code: Optional[str] = None, markdown: Optional[str] = None, metadata: Optional[RentryPageMetadata] = None, overwrite: bool = False, fetch: bool = False) -> RentryAsyncPage:
         """---
         Update a page you have the edit or modify code for.
 

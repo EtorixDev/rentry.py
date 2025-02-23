@@ -39,7 +39,7 @@ The command interface offers every endpoint as terminal commands. Those commands
 - `delete`: Delete a page you have the edit code for.
     - `rentry delete <--page-id PAGE_ID> <--edit-code EDIT_CODE>`
 
-#### Arguments
+### Arguments
 - `--page-id`
 - `--edit-code`
     - When used with the `update` command this can be a modify code instead.
