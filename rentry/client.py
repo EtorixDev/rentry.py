@@ -823,6 +823,10 @@ class RentryAsyncClient(RentryBase):
             self.refresh_session()
         if not self.csrf_token:
             raise RentryInvalidCSRFError("The CSRF token is invalid.")
+        if payload:
+            payload.update(self.payload)
+        else:
+            payload = self.payload
         async with httpx.AsyncClient() as client:
             response: httpx.Response = await client.request(method, f"{self.base_url}{endpoint}", headers=self.headers, cookies=self.cookies, data=payload)
         if response.status_code == 403:

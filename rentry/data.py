@@ -1,6 +1,6 @@
 import re
 
-USER_AGENT = "rentry.py/0.2.5"
+USER_AGENT = "rentry.py/0.2.6"
 
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
