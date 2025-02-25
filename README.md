@@ -130,6 +130,15 @@ print(new_page.stats.published_date)
 # 2025-02-22 01:15:30
 ```
 
+If you would like to identify yourself to the rentry API, you can do so by passing a `user_agent` to the client.
+```python
+sync_client = RentrySyncClient(user_agent = "My Cool Project")
+```
+
+This will make your request appear as `rentry.py/<version> (My Cool Project)` to the API.
+
+This is not required and at this time it is unknown if rentry will even make use of this information in any way.
+
 ### Advanced
 You can gain more control over your page style by making use of `RentryPageMetadata`. This is a mirror of the options listed at [rentry/metadata-how](https://rentry.co/metadata-how). You can also see a basic example of how metadata works at [rentry/metadata-example](https://rentry.co/metadata-example).
 

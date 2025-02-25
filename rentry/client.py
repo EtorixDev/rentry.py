@@ -284,6 +284,10 @@ class RentrySyncClient(RentryBase):
             self.refresh_session()
         if not self.csrf_token:
             raise RentryInvalidCSRFError("The CSRF token is invalid.")
+        if payload:
+            payload.update(self.payload)
+        else:
+            payload = self.payload
         response: httpx.Response = httpx.request(method, f"{self.base_url}{endpoint}", headers=self.headers, cookies=self.cookies, data=payload)
         if response.status_code == 403:
             raise RentryInvalidCSRFError("The CSRF token is invalid.")
@@ -338,7 +342,7 @@ class RentrySyncClient(RentryBase):
         is_modify_code: bool = edit_code.lower().startswith("m:")
         edit_code = self._verify_edit_code(edit_code) if not is_modify_code else self._verify_modify_code(edit_code)
         page_id = self._verify_page_id(page_id)
-        payload: dict = {**self.payload, "edit_code": edit_code}
+        payload: dict = {"edit_code": edit_code}
         response: dict = self._decipher_fetch(self._get_response("POST", f"/api/fetch/{page_id}", payload))
         page_id = response.get("url_case", "")
         markdown: str = response.get("text", "")
@@ -421,7 +425,7 @@ class RentrySyncClient(RentryBase):
         edit_code = self._verify_edit_code(edit_code) if edit_code else None
         page_id = self._verify_page_id(page_id) if page_id else None
         markdown = self._verify_markdown(markdown)
-        payload: dict = {**self.payload, "text": markdown}
+        payload: dict = {"text": markdown}
         if edit_code:
             payload["edit_code"] = edit_code
         if page_id:
@@ -488,7 +492,7 @@ class RentrySyncClient(RentryBase):
         new_modify_code = self._verify_modify_code(new_modify_code) if new_modify_code else None
         page_id = self._verify_page_id(page_id)
         markdown = self._verify_markdown(markdown, True) if markdown is not None else None
-        payload: dict = {**self.payload, "edit_code": edit_code}
+        payload: dict = {"edit_code": edit_code}
         if new_page_id:
             payload["new_url"] = new_page_id
         if new_edit_code:
@@ -530,7 +534,7 @@ class RentrySyncClient(RentryBase):
 
         edit_code = self._verify_edit_code(edit_code)
         page_id = self._verify_page_id(page_id)
-        payload: dict = {**self.payload, "edit_code": edit_code}
+        payload: dict = {"edit_code": edit_code}
         self._decipher_delete(self._get_response("POST", f"/api/delete/{page_id}", payload))
         return RentrySyncPage(self, page_id)
 
@@ -874,7 +878,7 @@ class RentryAsyncClient(RentryBase):
         is_modify_code: bool = edit_code.lower().startswith("m:")
         edit_code = self._verify_edit_code(edit_code) if not is_modify_code else self._verify_modify_code(edit_code)
         page_id = self._verify_page_id(page_id)
-        payload: dict = {**self.payload, "edit_code": edit_code}
+        payload: dict = {"edit_code": edit_code}
         response: dict = self._decipher_fetch(await self._get_response("POST", f"/api/fetch/{page_id}", payload))
         page_id = response.get("url_case", "")
         markdown: str = response.get("text", "")
@@ -957,7 +961,7 @@ class RentryAsyncClient(RentryBase):
         edit_code = self._verify_edit_code(edit_code) if edit_code else None
         page_id = self._verify_page_id(page_id) if page_id else None
         markdown = self._verify_markdown(markdown)
-        payload: dict = {**self.payload, "text": markdown}
+        payload: dict = {"text": markdown}
         if edit_code:
             payload["edit_code"] = edit_code
         if page_id:
@@ -1024,7 +1028,7 @@ class RentryAsyncClient(RentryBase):
         new_modify_code = self._verify_modify_code(new_modify_code) if new_modify_code else None
         page_id = self._verify_page_id(page_id)
         markdown = self._verify_markdown(markdown, True) if markdown is not None else None
-        payload: dict = {**self.payload, "edit_code": edit_code}
+        payload: dict = {"edit_code": edit_code}
         if new_page_id:
             payload["new_url"] = new_page_id
         if new_edit_code:
@@ -1066,7 +1070,7 @@ class RentryAsyncClient(RentryBase):
 
         edit_code = self._verify_edit_code(edit_code)
         page_id = self._verify_page_id(page_id)
-        payload: dict = {**self.payload, "edit_code": edit_code}
+        payload: dict = {"edit_code": edit_code}
         self._decipher_delete(await self._get_response("POST", f"/api/delete/{page_id}", payload))
         return RentryAsyncPage(self, page_id)
 
