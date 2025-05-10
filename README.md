@@ -71,7 +71,7 @@ The command interface offers every endpoint as terminal commands. Those commands
 - `rentry read --page-id py`
 - `rentry fetch --page-id py --edit-code pyEditCode`
 - `rentry exists --page-id py`
-- `rentry create --content "Hello, World!" --page-id py --edit-code pyEditCode`
+- `rentry create --markdown "Hello, World!" --page-id py --edit-code pyEditCode`
 - `rentry delete --page-id py --edit-code pyEditCode --base-url "https://rentry.org"`
 
 ## Module
