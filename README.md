@@ -1,4 +1,8 @@
 # [rentry.py](https://github.com/EtorixDev/rentry.py)
+[![](https://img.shields.io/pypi/v/rentry.py.svg?style=flat-square&color=5677a6)](https://pypi.org/project/rentry.py/)
+[![](https://img.shields.io/pypi/pyversions/rentry.py.svg?style=flat-square&color=5677a6)](https://pypi.org/project/rentry.py/)
+[![](https://img.shields.io/pypi/dm/rentry.py.svg?style=flat-square&color=5677a6)](https://pypi.org/project/rentry.py/)
+[![](https://img.shields.io/pypi/l/rentry.py.svg?style=flat-square&color=51a851)](https://pypi.org/project/rentry.py/)
 
 A python wrapper for the rentry markdown service.
 

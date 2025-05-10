@@ -6,4 +6,9 @@ __pycache__/
 *.pyo
 .vscode/
 .ruff_cache/
+.pytest_cache/
+htmlcov/
+.tox/
+.coverage
+dist/
 test.py
