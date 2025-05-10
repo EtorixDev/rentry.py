@@ -6,7 +6,16 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Literal, Optional
 
-from rentry.data import ANY_URL_REGEX, CSS_COLOR_NAMES, CSS_SIZE_REGEX, EMAIL_REGEX, HEX_REGEX, RENTRY_PAGE_URL_REGEX, RGBA_REGEX
+from rentry.data import (
+    ANY_URL_REGEX,
+    CSS_COLOR_NAMES,
+    CSS_SIZE_REGEX,
+    EMAIL_REGEX,
+    HEX_REGEX,
+    RENTRY_PAGE_URL_REGEX,
+    RGBA_REGEX,
+    SECRET_REGEX,
+)
 from rentry.errors import RentryInvalidMetadataError
 
 
@@ -64,7 +73,6 @@ class RentryPageMetadata:
         - Must be "dark" or "light" if set.
     - ACCESS_EASY_READ: `Optional[str]` — The easy read URL for the page.
         - Must be a valid rentry URL that is 300 characters or less.
-        - If omitting the domain, the URL must start with a forward slash.
     - SECRET_VERIFY: `Optional[str]` — One or more external services to recover the page if you lose access.
         - Must be 3000 characters or less.
     - SECRET_RAW_ACCESS_CODE: `Optional[str]` — A code which allows access to the `/raw` version of the page.
@@ -91,7 +99,7 @@ class RentryPageMetadata:
             - unitless: 100 - 1600, no decimals.
             - px: 100 - 1600, no decimals.
             - %: 10 - 100, up to 3 decimals.
-            - vw: 10 - 100, up to 4 decimals.
+            - vh: 10 - 100, up to 4 decimals.
             - hw: 10 - 100, up to 4 decimals.
             - rem: 3 - 25, up to 4 decimals.
     - CONTAINER_INNER_FOREGROUND_COLOR: `Optional[list[str]]` — The color of the inner foreground.
@@ -121,7 +129,7 @@ class RentryPageMetadata:
             - unitless: 1 - 3000, no decimals.
             - px: 1 - 3000, no decimals.
             - %: 0.1 - 150, up to 3 decimals.
-            - vw: 0.1 - 200, up to 4 decimals.
+            - vh: 0.1 - 200, up to 4 decimals.
             - hw: 0.1 - 200, up to 4 decimals.
             - rem: 0.1 - 50, up to 4 decimals.
     - CONTAINER_OUTER_FOREGROUND_COLOR: `Optional[list[str]]` — The color of the outer foreground.
@@ -151,7 +159,7 @@ class RentryPageMetadata:
             - unitless: 1 - 3000, no decimals.
             - px: 1 - 3000, no decimals.
             - %: 0.1 - 150, up to 3 decimals.
-            - vw: 0.1 - 200, up to 4 decimals.
+            - vh: 0.1 - 200, up to 4 decimals.
             - hw: 0.1 - 200, up to 4 decimals.
             - rem: 0.1 - 50, up to 4 decimals.
     - CONTAINER_BORDER_IMAGE: `Optional[str]` — The image of the container border.
@@ -219,7 +227,7 @@ class RentryPageMetadata:
             - unitless: 0 - 30, no decimals.
             - px: 0 - 30, no decimals.
             - %: 0 - 100, up to 3 decimals.
-            - vw: 0 - 100, up to 4 decimals.
+            - vh: 0 - 100, up to 4 decimals.
             - hw: 0 - 100, up to 4 decimals.
             - rem: 0 - 10, up to 4 decimals.
     - CONTAINER_BORDER_STYLE: `Optional[list[Literal["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]]]` — The style of the container border.
@@ -410,13 +418,17 @@ class RentryPageMetadata:
         CONTAINER_INNER_FOREGROUND_COLOR: Optional[list[str]] = None,
         CONTAINER_INNER_BACKGROUND_COLOR: Optional[list[str]] = None,
         CONTAINER_INNER_BACKGROUND_IMAGE: Optional[str] = None,
-        CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]] = None,
+        CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT: Optional[
+            Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]
+        ] = None,
         CONTAINER_INNER_BACKGROUND_IMAGE_POSITION: Optional[Literal["center", "left", "right", "top", "bottom"]] = None,
         CONTAINER_INNER_BACKGROUND_IMAGE_SIZE: Optional[Literal["contain", "cover"] | str] = None,
         CONTAINER_OUTER_FOREGROUND_COLOR: Optional[list[str]] = None,
         CONTAINER_OUTER_BACKGROUND_COLOR: Optional[list[str]] = None,
         CONTAINER_OUTER_BACKGROUND_IMAGE: Optional[str] = None,
-        CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]] = None,
+        CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT: Optional[
+            Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]
+        ] = None,
         CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION: Optional[Literal["center", "left", "right", "top", "bottom"]] = None,
         CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE: Optional[str] = None,
         CONTAINER_BORDER_IMAGE: Optional[str] = None,
@@ -426,14 +438,22 @@ class RentryPageMetadata:
         CONTAINER_BORDER_IMAGE_REPEAT: Optional[list[str]] = None,
         CONTAINER_BORDER_COLOR: Optional[list[str]] = None,
         CONTAINER_BORDER_WIDTH: Optional[list[str]] = None,
-        CONTAINER_BORDER_STYLE: Optional[list[Literal["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]]] = None,
+        CONTAINER_BORDER_STYLE: Optional[
+            list[Literal["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]]
+        ] = None,
         CONTAINER_BORDER_RADIUS: Optional[list[str]] = None,
         CONTAINER_SHADOW_COLOR: Optional[str] = None,
         CONTAINER_SHADOW_OFFSET: Optional[list[str]] = None,
         CONTAINER_SHADOW_SPREAD: Optional[str] = None,
         CONTAINER_SHADOW_BLUR: Optional[str] = None,
         CONTENT_FONT: Optional[list[str]] = None,
-        CONTENT_FONT_WEIGHT: Optional[list[Literal["bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"]]] = None,
+        CONTENT_FONT_WEIGHT: Optional[
+            list[
+                Literal[
+                    "bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"
+                ]
+            ]
+        ] = None,
         CONTENT_TEXT_DIRECTION: Optional[Literal["ltr", "rtl"]] = None,
         CONTENT_TEXT_SIZE: Optional[list[str]] = None,
         CONTENT_TEXT_ALIGN: Optional[Literal["right", "center", "justify"]] = None,
@@ -446,85 +466,199 @@ class RentryPageMetadata:
         CONTENT_LINK_BEHAVIOR: Optional[list[Literal["same", "new"]]] = None,
     ) -> None:
         self._PAGE_TITLE: Optional[str] = PAGE_TITLE.strip() if PAGE_TITLE and PAGE_TITLE.strip() else None
-        self._PAGE_DESCRIPTION: Optional[str] = PAGE_DESCRIPTION.strip() if PAGE_DESCRIPTION and PAGE_DESCRIPTION.strip() else None
+        self._PAGE_DESCRIPTION: Optional[str] = (
+            PAGE_DESCRIPTION.strip() if PAGE_DESCRIPTION and PAGE_DESCRIPTION.strip() else None
+        )
         self._PAGE_IMAGE: Optional[str] = PAGE_IMAGE.strip() if PAGE_IMAGE and PAGE_IMAGE.strip() else None
         self._PAGE_ICON: Optional[str] = PAGE_ICON.strip() if PAGE_ICON and PAGE_ICON.strip() else None
         self._SHARE_TITLE: Optional[str] = SHARE_TITLE.strip() if SHARE_TITLE and SHARE_TITLE.strip() else None
-        self._SHARE_DESCRIPTION: Optional[str] = SHARE_DESCRIPTION.strip() if SHARE_DESCRIPTION and SHARE_DESCRIPTION.strip() else None
+        self._SHARE_DESCRIPTION: Optional[str] = (
+            SHARE_DESCRIPTION.strip() if SHARE_DESCRIPTION and SHARE_DESCRIPTION.strip() else None
+        )
         self._SHARE_IMAGE: Optional[str] = SHARE_IMAGE.strip() if SHARE_IMAGE and SHARE_IMAGE.strip() else None
-        self._SHARE_TWITTER_TITLE: Optional[str] = SHARE_TWITTER_TITLE.strip() if SHARE_TWITTER_TITLE and SHARE_TWITTER_TITLE.strip() else None
-        self._SHARE_TWITTER_DESCRIPTION: Optional[str] = SHARE_TWITTER_DESCRIPTION.strip() if SHARE_TWITTER_DESCRIPTION and SHARE_TWITTER_DESCRIPTION.strip() else None
-        self._SHARE_TWITTER_IMAGE: Optional[str] = SHARE_TWITTER_IMAGE.strip() if SHARE_TWITTER_IMAGE and SHARE_TWITTER_IMAGE.strip() else None
+        self._SHARE_TWITTER_TITLE: Optional[str] = (
+            SHARE_TWITTER_TITLE.strip() if SHARE_TWITTER_TITLE and SHARE_TWITTER_TITLE.strip() else None
+        )
+        self._SHARE_TWITTER_DESCRIPTION: Optional[str] = (
+            SHARE_TWITTER_DESCRIPTION.strip()
+            if SHARE_TWITTER_DESCRIPTION and SHARE_TWITTER_DESCRIPTION.strip()
+            else None
+        )
+        self._SHARE_TWITTER_IMAGE: Optional[str] = (
+            SHARE_TWITTER_IMAGE.strip() if SHARE_TWITTER_IMAGE and SHARE_TWITTER_IMAGE.strip() else None
+        )
         self._OPTION_DISABLE_VIEWS: Optional[bool] = OPTION_DISABLE_VIEWS
         self._OPTION_DISABLE_SEARCH_ENGINE: Optional[bool] = OPTION_DISABLE_SEARCH_ENGINE
         self._OPTION_USE_ORIGINAL_PUB_DATE: Optional[bool] = OPTION_USE_ORIGINAL_PUB_DATE
-        self._ACCESS_RECOMMENDED_THEME: Optional[str] = ACCESS_RECOMMENDED_THEME.strip() if ACCESS_RECOMMENDED_THEME and ACCESS_RECOMMENDED_THEME.strip() else None
-        self._ACCESS_EASY_READ: Optional[str] = ("/" + ACCESS_EASY_READ.strip().split("/")[-1]) if ACCESS_EASY_READ and ACCESS_EASY_READ.strip() else None
+        self._ACCESS_RECOMMENDED_THEME: Optional[str] = (
+            ACCESS_RECOMMENDED_THEME.strip() if ACCESS_RECOMMENDED_THEME and ACCESS_RECOMMENDED_THEME.strip() else None
+        )
+        self._ACCESS_EASY_READ: Optional[str] = (
+            ("/" + ACCESS_EASY_READ.strip().split("/")[-1]) if ACCESS_EASY_READ and ACCESS_EASY_READ.strip() else None
+        )
         self._SECRET_VERIFY: Optional[str] = SECRET_VERIFY.strip() if SECRET_VERIFY and SECRET_VERIFY.strip() else None
-        self._SECRET_RAW_ACCESS_CODE: Optional[str] = SECRET_RAW_ACCESS_CODE.strip() if SECRET_RAW_ACCESS_CODE and SECRET_RAW_ACCESS_CODE.strip() else None
-        self._SECRET_EMAIL_ADDRESS: Optional[str] = SECRET_EMAIL_ADDRESS.strip() if SECRET_EMAIL_ADDRESS and SECRET_EMAIL_ADDRESS.strip() else None
-        self._CONTAINER_PADDING: Optional[list[str]] = [val.strip() for val in CONTAINER_PADDING if val.strip()] if CONTAINER_PADDING else None
-        self._CONTAINER_MAX_WIDTH: Optional[str] = CONTAINER_MAX_WIDTH.strip() if CONTAINER_MAX_WIDTH and CONTAINER_MAX_WIDTH.strip() else None
+        self._SECRET_RAW_ACCESS_CODE: Optional[str] = (
+            SECRET_RAW_ACCESS_CODE.strip() if SECRET_RAW_ACCESS_CODE and SECRET_RAW_ACCESS_CODE.strip() else None
+        )
+        self._SECRET_EMAIL_ADDRESS: Optional[str] = (
+            SECRET_EMAIL_ADDRESS.strip() if SECRET_EMAIL_ADDRESS and SECRET_EMAIL_ADDRESS.strip() else None
+        )
+        self._CONTAINER_PADDING: Optional[list[str]] = (
+            [val.strip() for val in CONTAINER_PADDING if val.strip()] if CONTAINER_PADDING else None
+        )
+        self._CONTAINER_MAX_WIDTH: Optional[str] = (
+            CONTAINER_MAX_WIDTH.strip() if CONTAINER_MAX_WIDTH and CONTAINER_MAX_WIDTH.strip() else None
+        )
         if CONTAINER_INNER_FOREGROUND_COLOR:
             for index, item in enumerate(CONTAINER_INNER_FOREGROUND_COLOR):
                 CONTAINER_INNER_FOREGROUND_COLOR[index] = item.replace(" ", "")
-        self._CONTAINER_INNER_FOREGROUND_COLOR: Optional[list[str]] = [val for val in CONTAINER_INNER_FOREGROUND_COLOR if val] if CONTAINER_INNER_FOREGROUND_COLOR else None
+        self._CONTAINER_INNER_FOREGROUND_COLOR: Optional[list[str]] = (
+            [val for val in CONTAINER_INNER_FOREGROUND_COLOR if val] if CONTAINER_INNER_FOREGROUND_COLOR else None
+        )
         if CONTAINER_INNER_BACKGROUND_COLOR:
             for index, item in enumerate(CONTAINER_INNER_BACKGROUND_COLOR):
                 CONTAINER_INNER_BACKGROUND_COLOR[index] = item.replace(" ", "")
-        self._CONTAINER_INNER_BACKGROUND_COLOR: Optional[list[str]] = [val for val in CONTAINER_INNER_BACKGROUND_COLOR if val] if CONTAINER_INNER_BACKGROUND_COLOR else None
-        self._CONTAINER_INNER_BACKGROUND_IMAGE: Optional[str] = CONTAINER_INNER_BACKGROUND_IMAGE.strip() if CONTAINER_INNER_BACKGROUND_IMAGE and CONTAINER_INNER_BACKGROUND_IMAGE.strip() else None
-        self._CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]] = CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT
-        self._CONTAINER_INNER_BACKGROUND_IMAGE_POSITION: Optional[Literal["center", "left", "right", "top", "bottom"]] = CONTAINER_INNER_BACKGROUND_IMAGE_POSITION
-        self._CONTAINER_INNER_BACKGROUND_IMAGE_SIZE: Optional[Literal["contain", "cover"] | str] = CONTAINER_INNER_BACKGROUND_IMAGE_SIZE
+        self._CONTAINER_INNER_BACKGROUND_COLOR: Optional[list[str]] = (
+            [val for val in CONTAINER_INNER_BACKGROUND_COLOR if val] if CONTAINER_INNER_BACKGROUND_COLOR else None
+        )
+        self._CONTAINER_INNER_BACKGROUND_IMAGE: Optional[str] = (
+            CONTAINER_INNER_BACKGROUND_IMAGE.strip()
+            if CONTAINER_INNER_BACKGROUND_IMAGE and CONTAINER_INNER_BACKGROUND_IMAGE.strip()
+            else None
+        )
+        self._CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT: Optional[
+            Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]
+        ] = CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT
+        self._CONTAINER_INNER_BACKGROUND_IMAGE_POSITION: Optional[
+            Literal["center", "left", "right", "top", "bottom"]
+        ] = CONTAINER_INNER_BACKGROUND_IMAGE_POSITION
+        self._CONTAINER_INNER_BACKGROUND_IMAGE_SIZE: Optional[Literal["contain", "cover"] | str] = (
+            CONTAINER_INNER_BACKGROUND_IMAGE_SIZE
+        )
         if CONTAINER_OUTER_FOREGROUND_COLOR:
             for index, item in enumerate(CONTAINER_OUTER_FOREGROUND_COLOR):
                 CONTAINER_OUTER_FOREGROUND_COLOR[index] = item.replace(" ", "")
-        self._CONTAINER_OUTER_FOREGROUND_COLOR: Optional[list[str]] = [val for val in CONTAINER_OUTER_FOREGROUND_COLOR if val] if CONTAINER_OUTER_FOREGROUND_COLOR else None
+        self._CONTAINER_OUTER_FOREGROUND_COLOR: Optional[list[str]] = (
+            [val for val in CONTAINER_OUTER_FOREGROUND_COLOR if val] if CONTAINER_OUTER_FOREGROUND_COLOR else None
+        )
         if CONTAINER_OUTER_BACKGROUND_COLOR:
             for index, item in enumerate(CONTAINER_OUTER_BACKGROUND_COLOR):
                 CONTAINER_OUTER_BACKGROUND_COLOR[index] = item.replace(" ", "")
-        self._CONTAINER_OUTER_BACKGROUND_COLOR: Optional[list[str]] = [val for val in CONTAINER_OUTER_BACKGROUND_COLOR if val] if CONTAINER_OUTER_BACKGROUND_COLOR else None
-        self._CONTAINER_OUTER_BACKGROUND_IMAGE: Optional[str] = CONTAINER_OUTER_BACKGROUND_IMAGE.strip() if CONTAINER_OUTER_BACKGROUND_IMAGE and CONTAINER_OUTER_BACKGROUND_IMAGE.strip() else None
-        self._CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]] = CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT
-        self._CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION: Optional[Literal["center", "left", "right", "top", "bottom"]] = CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION
-        self._CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE: Optional[str] = CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE.strip() if CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE and CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE.strip() else None
-        self._CONTAINER_BORDER_IMAGE: Optional[str] = CONTAINER_BORDER_IMAGE.strip() if CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE.strip() else None
-        self._CONTAINER_BORDER_IMAGE_SLICE: Optional[list[str]] = [val.strip() for val in CONTAINER_BORDER_IMAGE_SLICE if val.strip()] if CONTAINER_BORDER_IMAGE_SLICE else None
-        self._CONTAINER_BORDER_IMAGE_WIDTH: Optional[list[str]] = [val.strip() for val in CONTAINER_BORDER_IMAGE_WIDTH if val.strip()] if CONTAINER_BORDER_IMAGE_WIDTH else None
-        self._CONTAINER_BORDER_IMAGE_OUTSET: Optional[list[str]] = [val.strip() for val in CONTAINER_BORDER_IMAGE_OUTSET if val.strip()] if CONTAINER_BORDER_IMAGE_OUTSET else None
-        self._CONTAINER_BORDER_IMAGE_REPEAT: Optional[list[str]] = [val.strip() for val in CONTAINER_BORDER_IMAGE_REPEAT if val.strip()] if CONTAINER_BORDER_IMAGE_REPEAT else None
+        self._CONTAINER_OUTER_BACKGROUND_COLOR: Optional[list[str]] = (
+            [val for val in CONTAINER_OUTER_BACKGROUND_COLOR if val] if CONTAINER_OUTER_BACKGROUND_COLOR else None
+        )
+        self._CONTAINER_OUTER_BACKGROUND_IMAGE: Optional[str] = (
+            CONTAINER_OUTER_BACKGROUND_IMAGE.strip()
+            if CONTAINER_OUTER_BACKGROUND_IMAGE and CONTAINER_OUTER_BACKGROUND_IMAGE.strip()
+            else None
+        )
+        self._CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT: Optional[
+            Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]
+        ] = CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT
+        self._CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION: Optional[
+            Literal["center", "left", "right", "top", "bottom"]
+        ] = CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION
+        self._CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE: Optional[str] = (
+            CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE.strip()
+            if CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE and CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE.strip()
+            else None
+        )
+        self._CONTAINER_BORDER_IMAGE: Optional[str] = (
+            CONTAINER_BORDER_IMAGE.strip() if CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE.strip() else None
+        )
+        self._CONTAINER_BORDER_IMAGE_SLICE: Optional[list[str]] = (
+            [val.strip() for val in CONTAINER_BORDER_IMAGE_SLICE if val.strip()]
+            if CONTAINER_BORDER_IMAGE_SLICE
+            else None
+        )
+        self._CONTAINER_BORDER_IMAGE_WIDTH: Optional[list[str]] = (
+            [val.strip() for val in CONTAINER_BORDER_IMAGE_WIDTH if val.strip()]
+            if CONTAINER_BORDER_IMAGE_WIDTH
+            else None
+        )
+        self._CONTAINER_BORDER_IMAGE_OUTSET: Optional[list[str]] = (
+            [val.strip() for val in CONTAINER_BORDER_IMAGE_OUTSET if val.strip()]
+            if CONTAINER_BORDER_IMAGE_OUTSET
+            else None
+        )
+        self._CONTAINER_BORDER_IMAGE_REPEAT: Optional[list[str]] = (
+            [val.strip() for val in CONTAINER_BORDER_IMAGE_REPEAT if val.strip()]
+            if CONTAINER_BORDER_IMAGE_REPEAT
+            else None
+        )
         if CONTAINER_BORDER_COLOR:
             for index, item in enumerate(CONTAINER_BORDER_COLOR):
                 CONTAINER_BORDER_COLOR[index] = item.replace(" ", "")
-        self._CONTAINER_BORDER_COLOR: Optional[list[str]] = [val for val in CONTAINER_BORDER_COLOR if val] if CONTAINER_BORDER_COLOR else None
-        self._CONTAINER_BORDER_WIDTH: Optional[list[str]] = [val.strip() for val in CONTAINER_BORDER_WIDTH if val.strip()] if CONTAINER_BORDER_WIDTH else None
-        self._CONTAINER_BORDER_STYLE: Optional[list[Literal["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]]] = CONTAINER_BORDER_STYLE
-        self._CONTAINER_BORDER_RADIUS: Optional[list[str]] = [val.strip() for val in CONTAINER_BORDER_RADIUS if val.strip()] if CONTAINER_BORDER_RADIUS else None
-        self._CONTAINER_SHADOW_COLOR: Optional[str] = CONTAINER_SHADOW_COLOR.replace(" ", "") if CONTAINER_SHADOW_COLOR and CONTAINER_SHADOW_COLOR.replace(" ", "") else None
-        self._CONTAINER_SHADOW_OFFSET: Optional[list[str]] = [val.strip() for val in CONTAINER_SHADOW_OFFSET if val.strip()] if CONTAINER_SHADOW_OFFSET else None
-        self._CONTAINER_SHADOW_SPREAD: Optional[str] = CONTAINER_SHADOW_SPREAD.strip() if CONTAINER_SHADOW_SPREAD and CONTAINER_SHADOW_SPREAD.strip() else None
-        self._CONTAINER_SHADOW_BLUR: Optional[str] = CONTAINER_SHADOW_BLUR.strip() if CONTAINER_SHADOW_BLUR and CONTAINER_SHADOW_BLUR.strip() else None
-        self._CONTENT_FONT: Optional[list[str]] = [val.strip() for val in CONTENT_FONT if val.strip()] if CONTENT_FONT else None
-        self._CONTENT_FONT_WEIGHT: Optional[list[Literal["bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"]]] = CONTENT_FONT_WEIGHT
+        self._CONTAINER_BORDER_COLOR: Optional[list[str]] = (
+            [val for val in CONTAINER_BORDER_COLOR if val] if CONTAINER_BORDER_COLOR else None
+        )
+        self._CONTAINER_BORDER_WIDTH: Optional[list[str]] = (
+            [val.strip() for val in CONTAINER_BORDER_WIDTH if val.strip()] if CONTAINER_BORDER_WIDTH else None
+        )
+        self._CONTAINER_BORDER_STYLE: Optional[
+            list[Literal["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]]
+        ] = CONTAINER_BORDER_STYLE
+        self._CONTAINER_BORDER_RADIUS: Optional[list[str]] = (
+            [val.strip() for val in CONTAINER_BORDER_RADIUS if val.strip()] if CONTAINER_BORDER_RADIUS else None
+        )
+        self._CONTAINER_SHADOW_COLOR: Optional[str] = (
+            CONTAINER_SHADOW_COLOR.replace(" ", "")
+            if CONTAINER_SHADOW_COLOR and CONTAINER_SHADOW_COLOR.replace(" ", "")
+            else None
+        )
+        self._CONTAINER_SHADOW_OFFSET: Optional[list[str]] = (
+            [val.strip() for val in CONTAINER_SHADOW_OFFSET if val.strip()] if CONTAINER_SHADOW_OFFSET else None
+        )
+        self._CONTAINER_SHADOW_SPREAD: Optional[str] = (
+            CONTAINER_SHADOW_SPREAD.strip() if CONTAINER_SHADOW_SPREAD and CONTAINER_SHADOW_SPREAD.strip() else None
+        )
+        self._CONTAINER_SHADOW_BLUR: Optional[str] = (
+            CONTAINER_SHADOW_BLUR.strip() if CONTAINER_SHADOW_BLUR and CONTAINER_SHADOW_BLUR.strip() else None
+        )
+        self._CONTENT_FONT: Optional[list[str]] = (
+            [val.strip() for val in CONTENT_FONT if val.strip()] if CONTENT_FONT else None
+        )
+        self._CONTENT_FONT_WEIGHT: Optional[
+            list[
+                Literal[
+                    "bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"
+                ]
+            ]
+        ] = CONTENT_FONT_WEIGHT
         self._CONTENT_TEXT_DIRECTION: Optional[Literal["ltr", "rtl"]] = CONTENT_TEXT_DIRECTION
-        self._CONTENT_TEXT_SIZE: Optional[list[str]] = [val.strip() for val in CONTENT_TEXT_SIZE if val.strip()] if CONTENT_TEXT_SIZE else None
+        self._CONTENT_TEXT_SIZE: Optional[list[str]] = (
+            [val.strip() for val in CONTENT_TEXT_SIZE if val.strip()] if CONTENT_TEXT_SIZE else None
+        )
         self._CONTENT_TEXT_ALIGN: Optional[Literal["right", "center", "justify"]] = CONTENT_TEXT_ALIGN
-        self._CONTENT_TEXT_SHADOW_COLOR: Optional[str] = CONTENT_TEXT_SHADOW_COLOR.replace(" ", "") if CONTENT_TEXT_SHADOW_COLOR and CONTENT_TEXT_SHADOW_COLOR.replace(" ", "") else None
-        self._CONTENT_TEXT_SHADOW_OFFSET: Optional[list[str]] = [val.strip() for val in CONTENT_TEXT_SHADOW_OFFSET if val.strip()] if CONTENT_TEXT_SHADOW_OFFSET else None
-        self._CONTENT_TEXT_SHADOW_BLUR: Optional[str] = CONTENT_TEXT_SHADOW_BLUR.strip() if CONTENT_TEXT_SHADOW_BLUR and CONTENT_TEXT_SHADOW_BLUR.strip() else None
+        self._CONTENT_TEXT_SHADOW_COLOR: Optional[str] = (
+            CONTENT_TEXT_SHADOW_COLOR.replace(" ", "")
+            if CONTENT_TEXT_SHADOW_COLOR and CONTENT_TEXT_SHADOW_COLOR.replace(" ", "")
+            else None
+        )
+        self._CONTENT_TEXT_SHADOW_OFFSET: Optional[list[str]] = (
+            [val.strip() for val in CONTENT_TEXT_SHADOW_OFFSET if val.strip()] if CONTENT_TEXT_SHADOW_OFFSET else None
+        )
+        self._CONTENT_TEXT_SHADOW_BLUR: Optional[str] = (
+            CONTENT_TEXT_SHADOW_BLUR.strip() if CONTENT_TEXT_SHADOW_BLUR and CONTENT_TEXT_SHADOW_BLUR.strip() else None
+        )
         if CONTENT_TEXT_COLOR:
             for index, item in enumerate(CONTENT_TEXT_COLOR):
                 CONTENT_TEXT_COLOR[index] = item.replace(" ", "")
-        self._CONTENT_TEXT_COLOR: Optional[list[str]] = [val for val in CONTENT_TEXT_COLOR if val] if CONTENT_TEXT_COLOR else None
+        self._CONTENT_TEXT_COLOR: Optional[list[str]] = (
+            [val for val in CONTENT_TEXT_COLOR if val] if CONTENT_TEXT_COLOR else None
+        )
         if CONTENT_LINK_COLOR:
             for index, item in enumerate(CONTENT_LINK_COLOR):
                 CONTENT_LINK_COLOR[index] = item.replace(" ", "")
-        self._CONTENT_LINK_COLOR: Optional[list[str]] = [val for val in CONTENT_LINK_COLOR if val] if CONTENT_LINK_COLOR else None
+        self._CONTENT_LINK_COLOR: Optional[list[str]] = (
+            [val for val in CONTENT_LINK_COLOR if val] if CONTENT_LINK_COLOR else None
+        )
         if CONTENT_BULLET_COLOR:
             for index, item in enumerate(CONTENT_BULLET_COLOR):
                 CONTENT_BULLET_COLOR[index] = item.replace(" ", "")
-        self._CONTENT_BULLET_COLOR: Optional[list[str]] = [val for val in CONTENT_BULLET_COLOR if val] if CONTENT_BULLET_COLOR else None
+        self._CONTENT_BULLET_COLOR: Optional[list[str]] = (
+            [val for val in CONTENT_BULLET_COLOR if val] if CONTENT_BULLET_COLOR else None
+        )
         self._CONTENT_LINK_BEHAVIOR: Optional[list[Literal["same", "new"]]] = CONTENT_LINK_BEHAVIOR
 
         self.validate()
@@ -736,7 +870,9 @@ class RentryPageMetadata:
 
     @CONTAINER_INNER_FOREGROUND_COLOR.setter
     def CONTAINER_INNER_FOREGROUND_COLOR(self, value: Optional[list[str]]) -> None:
-        self._CONTAINER_INNER_FOREGROUND_COLOR = [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
+        self._CONTAINER_INNER_FOREGROUND_COLOR = (
+            [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
+        )
         self.validate()
 
     @property
@@ -746,7 +882,9 @@ class RentryPageMetadata:
 
     @CONTAINER_INNER_BACKGROUND_COLOR.setter
     def CONTAINER_INNER_BACKGROUND_COLOR(self, value: Optional[list[str]]) -> None:
-        self._CONTAINER_INNER_BACKGROUND_COLOR = [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
+        self._CONTAINER_INNER_BACKGROUND_COLOR = (
+            [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
+        )
         self.validate()
 
     @property
@@ -760,22 +898,30 @@ class RentryPageMetadata:
         self.validate()
 
     @property
-    def CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT(self) -> Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]]:
+    def CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT(
+        self,
+    ) -> Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]]:
         """The repeat style of the inner background image."""
         return self._CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT
 
     @CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT.setter
-    def CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT(self, value: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]]) -> None:
+    def CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT(
+        self, value: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]]
+    ) -> None:
         self._CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT = value
         self.validate()
 
     @property
-    def CONTAINER_INNER_BACKGROUND_IMAGE_POSITION(self) -> Optional[Literal["center", "left", "right", "top", "bottom"]]:
+    def CONTAINER_INNER_BACKGROUND_IMAGE_POSITION(
+        self,
+    ) -> Optional[Literal["center", "left", "right", "top", "bottom"]]:
         """The position of the inner background image."""
         return self._CONTAINER_INNER_BACKGROUND_IMAGE_POSITION
 
     @CONTAINER_INNER_BACKGROUND_IMAGE_POSITION.setter
-    def CONTAINER_INNER_BACKGROUND_IMAGE_POSITION(self, value: Optional[Literal["center", "left", "right", "top", "bottom"]]) -> None:
+    def CONTAINER_INNER_BACKGROUND_IMAGE_POSITION(
+        self, value: Optional[Literal["center", "left", "right", "top", "bottom"]]
+    ) -> None:
         self._CONTAINER_INNER_BACKGROUND_IMAGE_POSITION = value
         self.validate()
 
@@ -796,7 +942,9 @@ class RentryPageMetadata:
 
     @CONTAINER_OUTER_FOREGROUND_COLOR.setter
     def CONTAINER_OUTER_FOREGROUND_COLOR(self, value: Optional[list[str]]) -> None:
-        self._CONTAINER_OUTER_FOREGROUND_COLOR = [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
+        self._CONTAINER_OUTER_FOREGROUND_COLOR = (
+            [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
+        )
         self.validate()
 
     @property
@@ -806,7 +954,9 @@ class RentryPageMetadata:
 
     @CONTAINER_OUTER_BACKGROUND_COLOR.setter
     def CONTAINER_OUTER_BACKGROUND_COLOR(self, value: Optional[list[str]]) -> None:
-        self._CONTAINER_OUTER_BACKGROUND_COLOR = [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
+        self._CONTAINER_OUTER_BACKGROUND_COLOR = (
+            [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
+        )
         self.validate()
 
     @property
@@ -820,22 +970,30 @@ class RentryPageMetadata:
         self.validate()
 
     @property
-    def CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT(self) -> Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]]:
+    def CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT(
+        self,
+    ) -> Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]]:
         """The repeat style of the outer background image."""
         return self._CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT
 
     @CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT.setter
-    def CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT(self, value: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]]) -> None:
+    def CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT(
+        self, value: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]]
+    ) -> None:
         self._CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT = value
         self.validate()
 
     @property
-    def CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION(self) -> Optional[Literal["center", "left", "right", "top", "bottom"]]:
+    def CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION(
+        self,
+    ) -> Optional[Literal["center", "left", "right", "top", "bottom"]]:
         """The position of the outer background image."""
         return self._CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION
 
     @CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION.setter
-    def CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION(self, value: Optional[Literal["center", "left", "right", "top", "bottom"]]) -> None:
+    def CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION(
+        self, value: Optional[Literal["center", "left", "right", "top", "bottom"]]
+    ) -> None:
         self._CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION = value
         self.validate()
 
@@ -906,7 +1064,9 @@ class RentryPageMetadata:
 
     @CONTAINER_BORDER_COLOR.setter
     def CONTAINER_BORDER_COLOR(self, value: Optional[list[str]]) -> None:
-        self._CONTAINER_BORDER_COLOR = [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
+        self._CONTAINER_BORDER_COLOR = (
+            [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
+        )
         self.validate()
 
     @property
@@ -920,12 +1080,17 @@ class RentryPageMetadata:
         self.validate()
 
     @property
-    def CONTAINER_BORDER_STYLE(self) -> Optional[list[Literal["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]]]:
+    def CONTAINER_BORDER_STYLE(
+        self,
+    ) -> Optional[list[Literal["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]]]:
         """The style of the container border."""
         return self._CONTAINER_BORDER_STYLE
 
     @CONTAINER_BORDER_STYLE.setter
-    def CONTAINER_BORDER_STYLE(self, value: Optional[list[Literal["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]]]) -> None:
+    def CONTAINER_BORDER_STYLE(
+        self,
+        value: Optional[list[Literal["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]]],
+    ) -> None:
         self._CONTAINER_BORDER_STYLE = value
         self.validate()
 
@@ -990,12 +1155,29 @@ class RentryPageMetadata:
         self.validate()
 
     @property
-    def CONTENT_FONT_WEIGHT(self) -> Optional[list[Literal["bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"]]]:
+    def CONTENT_FONT_WEIGHT(
+        self,
+    ) -> Optional[
+        list[
+            Literal[
+                "bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"
+            ]
+        ]
+    ]:
         """The boldness of the content font."""
         return self._CONTENT_FONT_WEIGHT
 
     @CONTENT_FONT_WEIGHT.setter
-    def CONTENT_FONT_WEIGHT(self, value: Optional[list[Literal["bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"]]]) -> None:
+    def CONTENT_FONT_WEIGHT(
+        self,
+        value: Optional[
+            list[
+                Literal[
+                    "bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"
+                ]
+            ]
+        ],
+    ) -> None:
         self._CONTENT_FONT_WEIGHT = value
         self.validate()
 
@@ -1086,7 +1268,9 @@ class RentryPageMetadata:
 
     @CONTENT_BULLET_COLOR.setter
     def CONTENT_BULLET_COLOR(self, value: Optional[list[str]]) -> None:
-        self._CONTENT_BULLET_COLOR = [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
+        self._CONTENT_BULLET_COLOR = (
+            [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
+        )
         self.validate()
 
     @property
@@ -1101,6 +1285,7 @@ class RentryPageMetadata:
 
     def _check_css_size(
         self,
+        *,
         rule: str,
         values: list[str] | str,
         max_values: int,
@@ -1131,7 +1316,9 @@ class RentryPageMetadata:
                 if not allowed_terms:
                     errors.append(f"{rule} must be a valid CSS size.")
                 elif value not in allowed_terms:
-                    errors.append(f"{rule} must be a valid CSS size or one of the following: {', '.join(allowed_terms)}.")
+                    errors.append(
+                        f"{rule} must be a valid CSS size or one of the following: {', '.join(allowed_terms)}."
+                    )
                 continue
 
             number_str: str = match.group(1)
@@ -1142,7 +1329,9 @@ class RentryPageMetadata:
                 if not unitless_bounds:
                     errors.append(f"{rule} values must have units.")
                 elif not unitless_bounds[0] <= number <= unitless_bounds[1]:
-                    errors.append(f"{rule} unitless values must be between {unitless_bounds[0]} and {unitless_bounds[1]}.")
+                    errors.append(
+                        f"{rule} unitless values must be between {unitless_bounds[0]} and {unitless_bounds[1]}."
+                    )
             elif unit == "px":
                 if not px_bounds:
                     errors.append(f"{rule} values do not support px units.")
@@ -1177,7 +1366,7 @@ class RentryPageMetadata:
 
         return seen_errors
 
-    def _check_css_color(self, rule: str, values: list[str] | str, max_values: int, max_length: int) -> list[str]:
+    def _check_css_color(self, *, rule: str, values: list[str] | str, max_values: int, max_length: int) -> list[str]:
         errors: list[str] = []
         values = values if isinstance(values, list) else [values]
 
@@ -1189,7 +1378,10 @@ class RentryPageMetadata:
         if len(" ".join(values)) > max_length:
             errors.append(f"{rule} must have a total length of {max_length} characters or less.")
 
-        if any(not HEX_REGEX.match(value) and not RGBA_REGEX.match(value) and value not in CSS_COLOR_NAMES for value in values):
+        if any(
+            not HEX_REGEX.match(value) and not RGBA_REGEX.match(value) and value not in CSS_COLOR_NAMES
+            for value in values
+        ):
             errors.append(f"{rule} values must be valid HEX codes, RGBA values, or CSS color names.")
 
         return errors
@@ -1273,182 +1465,612 @@ class RentryPageMetadata:
 
         if self._PAGE_TITLE and len(self._PAGE_TITLE) > 60:
             errors.append("PAGE_TITLE must be 60 characters or less.")
+
         if self._PAGE_DESCRIPTION and len(self._PAGE_DESCRIPTION) > 160:
             errors.append("PAGE_DESCRIPTION must be 160 characters or less.")
+
         if self._PAGE_IMAGE:
             if len(self._PAGE_IMAGE) > 1_000:
                 errors.append("PAGE_IMAGE must be 1,000 characters or less.")
-            elif not ANY_URL_REGEX.match(self._PAGE_IMAGE):
+
+            if not ANY_URL_REGEX.match(self._PAGE_IMAGE):
                 errors.append("PAGE_IMAGE must be a valid URL.")
+
         if self._PAGE_ICON:
             if len(self._PAGE_ICON) > 1_000:
                 errors.append("PAGE_ICON must be 1,000 characters or less.")
-            elif not ANY_URL_REGEX.match(self._PAGE_ICON):
+
+            if not ANY_URL_REGEX.match(self._PAGE_ICON):
                 errors.append("PAGE_ICON must be a valid URL.")
+
         if self._SHARE_TITLE and len(self._SHARE_TITLE) > 60:
             errors.append("SHARE_TITLE must be 60 characters or less.")
+
         if self._SHARE_DESCRIPTION and len(self._SHARE_DESCRIPTION) > 160:
             errors.append("SHARE_DESCRIPTION must be 160 characters or less.")
+
         if self._SHARE_IMAGE:
             if len(self._SHARE_IMAGE) > 1_000:
                 errors.append("SHARE_IMAGE must be 1,000 characters or less.")
-            elif not ANY_URL_REGEX.match(self._SHARE_IMAGE):
+
+            if not ANY_URL_REGEX.match(self._SHARE_IMAGE):
                 errors.append("SHARE_IMAGE must be a valid URL.")
+
         if self._SHARE_TWITTER_TITLE and len(self._SHARE_TWITTER_TITLE) > 60:
             errors.append("SHARE_TWITTER_TITLE must be 60 characters or less.")
+
         if self._SHARE_TWITTER_DESCRIPTION and len(self._SHARE_TWITTER_DESCRIPTION) > 160:
             errors.append("SHARE_TWITTER_DESCRIPTION must be 160 characters or less.")
+
         if self._SHARE_TWITTER_IMAGE:
             if len(self._SHARE_TWITTER_IMAGE) > 1_000:
                 errors.append("SHARE_TWITTER_IMAGE must be 1,000 characters or less.")
-            elif not ANY_URL_REGEX.match(self._SHARE_TWITTER_IMAGE):
+
+            if not ANY_URL_REGEX.match(self._SHARE_TWITTER_IMAGE):
                 errors.append("SHARE_TWITTER_IMAGE must be a valid URL.")
-        if self._ACCESS_RECOMMENDED_THEME and self._ACCESS_RECOMMENDED_THEME not in ["dark", "light"]:
-            errors.append('ACCESS_RECOMMENDED_THEME must be "dark" or "light".')
+
+        if self._ACCESS_RECOMMENDED_THEME:
+            valid_themes = ["dark", "light"]
+
+            if self._ACCESS_RECOMMENDED_THEME not in valid_themes:
+                errors.append('ACCESS_RECOMMENDED_THEME must be "dark" or "light".')
+
         if self._ACCESS_EASY_READ:
             if len(self._ACCESS_EASY_READ) > 300:
                 errors.append("ACCESS_EASY_READ must be 300 characters or less.")
+
             if not RENTRY_PAGE_URL_REGEX.match(self._ACCESS_EASY_READ):
                 errors.append("ACCESS_EASY_READ must be a valid rentry URL.")
+
         if self._SECRET_VERIFY and len(self._SECRET_VERIFY) > 3_000:
             errors.append("SECRET_VERIFY must be 3,000 characters or less.")
+
         if self._SECRET_RAW_ACCESS_CODE and len(self._SECRET_RAW_ACCESS_CODE) > 100:
             errors.append("SECRET_RAW_ACCESS_CODE must be 100 characters or less.")
+
         if self._SECRET_EMAIL_ADDRESS:
             if len(self._SECRET_EMAIL_ADDRESS) > 300:
                 errors.append("SECRET_EMAIL_ADDRESS must be 300 characters or less.")
-            if not EMAIL_REGEX.match(self._SECRET_EMAIL_ADDRESS) and not self._SECRET_EMAIL_ADDRESS.startswith("||"):
+
+            if not EMAIL_REGEX.match(self._SECRET_EMAIL_ADDRESS) and not SECRET_REGEX.match(self._SECRET_EMAIL_ADDRESS):
                 errors.append("SECRET_EMAIL_ADDRESS must be a valid email address.")
+
         if self._CONTAINER_PADDING:
-            errors.extend(self._check_css_size("CONTAINER_PADDING", self._CONTAINER_PADDING, 4, 64, [], (0, 40, 0), (0, 40, 0), (0, 25, 3), (0, 15, 4), (0, 20, 4), (0, 7, 4)))
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTAINER_PADDING",
+                    values=self._CONTAINER_PADDING,
+                    max_values=4,
+                    max_length=64,
+                    allowed_terms=[],
+                    unitless_bounds=(0, 40, 0),
+                    px_bounds=(0, 40, 0),
+                    percent_bounds=(0, 25, 3),
+                    vh_bounds=(0, 15, 4),
+                    hw_bounds=(0, 20, 4),
+                    rem_bounds=(0, 7, 4),
+                )
+            )
+
         if self._CONTAINER_MAX_WIDTH:
-            errors.extend(self._check_css_size("CONTAINER_MAX_WIDTH", self._CONTAINER_MAX_WIDTH, 1, 16, [], (100, 1600, 0), (100, 1600, 0), (10, 100, 3), (10, 100, 4), (10, 100, 4), (3, 25, 4)))
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTAINER_MAX_WIDTH",
+                    values=self._CONTAINER_MAX_WIDTH,
+                    max_values=1,
+                    max_length=16,
+                    allowed_terms=[],
+                    unitless_bounds=(100, 1600, 0),
+                    px_bounds=(100, 1600, 0),
+                    percent_bounds=(10, 100, 3),
+                    vh_bounds=(10, 100, 4),
+                    hw_bounds=(10, 100, 4),
+                    rem_bounds=(3, 25, 4),
+                )
+            )
+
         if self._CONTAINER_INNER_FOREGROUND_COLOR:
-            errors.extend(self._check_css_color("CONTAINER_INNER_FOREGROUND_COLOR", self._CONTAINER_INNER_FOREGROUND_COLOR, 2, 32))
+            errors.extend(
+                self._check_css_color(
+                    rule="CONTAINER_INNER_FOREGROUND_COLOR",
+                    values=self._CONTAINER_INNER_FOREGROUND_COLOR,
+                    max_values=2,
+                    max_length=32,
+                )
+            )
+
         if self._CONTAINER_INNER_BACKGROUND_COLOR:
-            errors.extend(self._check_css_color("CONTAINER_INNER_BACKGROUND_COLOR", self._CONTAINER_INNER_BACKGROUND_COLOR, 2, 32))
+            errors.extend(
+                self._check_css_color(
+                    rule="CONTAINER_INNER_BACKGROUND_COLOR",
+                    values=self._CONTAINER_INNER_BACKGROUND_COLOR,
+                    max_values=2,
+                    max_length=32,
+                )
+            )
+
         if self._CONTAINER_INNER_BACKGROUND_IMAGE:
             if len(self._CONTAINER_INNER_BACKGROUND_IMAGE) > 1_000:
                 errors.append("CONTAINER_INNER_BACKGROUND_IMAGE must be 1,000 characters or less.")
-            elif not ANY_URL_REGEX.match(self._CONTAINER_INNER_BACKGROUND_IMAGE):
+
+            if not ANY_URL_REGEX.match(self._CONTAINER_INNER_BACKGROUND_IMAGE):
                 errors.append("CONTAINER_INNER_BACKGROUND_IMAGE must be a valid URL.")
-        if self._CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT and self._CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT not in ["no-repeat", "repeat-x", "repeat-y", "round", "space"]:
-            errors.append('CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT must be "no-repeat", "repeat-x", "repeat-y", "round", or "space".')
-        if self._CONTAINER_INNER_BACKGROUND_IMAGE_POSITION and self._CONTAINER_INNER_BACKGROUND_IMAGE_POSITION not in ["center", "left", "right", "top", "bottom"]:
-            errors.append('CONTAINER_INNER_BACKGROUND_IMAGE_POSITION must be "center", "left", "right", "top", or "bottom".')
+
+        if self._CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT:
+            valid_repeats = ["no-repeat", "repeat-x", "repeat-y", "round", "space"]
+
+            if self._CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT not in valid_repeats:
+                errors.append(
+                    'CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT must be "no-repeat", "repeat-x", "repeat-y", "round", or "space".'
+                )
+
+        if self._CONTAINER_INNER_BACKGROUND_IMAGE_POSITION:
+            valid_positions = ["center", "left", "right", "top", "bottom"]
+
+            if self._CONTAINER_INNER_BACKGROUND_IMAGE_POSITION not in valid_positions:
+                errors.append(
+                    'CONTAINER_INNER_BACKGROUND_IMAGE_POSITION must be "center", "left", "right", "top", or "bottom".'
+                )
+
         if self._CONTAINER_INNER_BACKGROUND_IMAGE_SIZE:
-            errors.extend(self._check_css_size("CONTAINER_INNER_BACKGROUND_IMAGE_SIZE", self._CONTAINER_INNER_BACKGROUND_IMAGE_SIZE, 1, 16, ["contain", "cover"], (1, 3000, 0), (1, 3000, 0), (0.1, 150, 3), (0.1, 200, 4), (0.1, 200, 4), (0.1, 50, 4)))
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTAINER_INNER_BACKGROUND_IMAGE_SIZE",
+                    values=self._CONTAINER_INNER_BACKGROUND_IMAGE_SIZE,
+                    max_values=1,
+                    max_length=16,
+                    allowed_terms=["contain", "cover"],
+                    unitless_bounds=(1, 3000, 0),
+                    px_bounds=(1, 3000, 0),
+                    percent_bounds=(0.1, 150, 3),
+                    vh_bounds=(0.1, 200, 4),
+                    hw_bounds=(0.1, 200, 4),
+                    rem_bounds=(0.1, 50, 4),
+                )
+            )
+
         if self._CONTAINER_OUTER_FOREGROUND_COLOR:
-            errors.extend(self._check_css_color("CONTAINER_OUTER_FOREGROUND_COLOR", self._CONTAINER_OUTER_FOREGROUND_COLOR, 2, 32))
+            errors.extend(
+                self._check_css_color(
+                    rule="CONTAINER_OUTER_FOREGROUND_COLOR",
+                    values=self._CONTAINER_OUTER_FOREGROUND_COLOR,
+                    max_values=2,
+                    max_length=32,
+                )
+            )
+
         if self._CONTAINER_OUTER_BACKGROUND_COLOR:
-            errors.extend(self._check_css_color("CONTAINER_OUTER_BACKGROUND_COLOR", self._CONTAINER_OUTER_BACKGROUND_COLOR, 2, 32))
+            errors.extend(
+                self._check_css_color(
+                    rule="CONTAINER_OUTER_BACKGROUND_COLOR",
+                    values=self._CONTAINER_OUTER_BACKGROUND_COLOR,
+                    max_values=2,
+                    max_length=32,
+                )
+            )
+
         if self._CONTAINER_OUTER_BACKGROUND_IMAGE:
             if len(self._CONTAINER_OUTER_BACKGROUND_IMAGE) > 1_000:
                 errors.append("CONTAINER_OUTER_BACKGROUND_IMAGE must be 1,000 characters or less.")
-            elif not ANY_URL_REGEX.match(self._CONTAINER_OUTER_BACKGROUND_IMAGE):
+
+            if not ANY_URL_REGEX.match(self._CONTAINER_OUTER_BACKGROUND_IMAGE):
                 errors.append("CONTAINER_OUTER_BACKGROUND_IMAGE must be a valid URL.")
-        if self._CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT and self._CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT not in ["no-repeat", "repeat-x", "repeat-y", "round", "space"]:
-            errors.append('CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT must be "no-repeat", "repeat-x", "repeat-y", "round", or "space".')
-        if self._CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION and self._CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION not in ["center", "left", "right", "top", "bottom"]:
-            errors.append('CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION must be "center", "left", "right", "top", or "bottom".')
+
+        if self._CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT:
+            valid_repeats = ["no-repeat", "repeat-x", "repeat-y", "round", "space"]
+
+            if self._CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT not in valid_repeats:
+                errors.append(
+                    'CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT must be "no-repeat", "repeat-x", "repeat-y", "round", or "space".'
+                )
+
+        if self._CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION:
+            valid_positions = ["center", "left", "right", "top", "bottom"]
+
+            if self._CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION not in valid_positions:
+                errors.append(
+                    'CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION must be "center", "left", "right", "top", or "bottom".'
+                )
+
         if self._CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE:
-            errors.extend(self._check_css_size("CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE", self._CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE, 1, 16, ["contain", "cover"], (1, 3000, 0), (1, 3000, 0), (0.1, 150, 3), (0.1, 200, 4), (0.1, 200, 4), (0.1, 50, 4)))
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE",
+                    values=self._CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE,
+                    max_values=1,
+                    max_length=16,
+                    allowed_terms=["contain", "cover"],
+                    unitless_bounds=(1, 3000, 0),
+                    px_bounds=(1, 3000, 0),
+                    percent_bounds=(0.1, 150, 3),
+                    vh_bounds=(0.1, 200, 4),
+                    hw_bounds=(0.1, 200, 4),
+                    rem_bounds=(0.1, 50, 4),
+                )
+            )
+
         if self._CONTAINER_BORDER_IMAGE:
             if len(self._CONTAINER_BORDER_IMAGE) > 1_000:
                 errors.append("CONTAINER_BORDER_IMAGE must be 1,000 characters or less.")
-            elif not ANY_URL_REGEX.match(self._CONTAINER_BORDER_IMAGE):
+
+            if not ANY_URL_REGEX.match(self._CONTAINER_BORDER_IMAGE):
                 errors.append("CONTAINER_BORDER_IMAGE must be a valid URL.")
+
         if self._CONTAINER_BORDER_IMAGE_SLICE:
             if not self._CONTAINER_BORDER_IMAGE or not self._CONTAINER_BORDER_IMAGE_WIDTH:
-                errors.append("CONTAINER_BORDER_IMAGE_SLICE requires CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE_WIDTH.")
-            errors.extend(self._check_css_size("CONTAINER_BORDER_IMAGE_SLICE", self._CONTAINER_BORDER_IMAGE_SLICE, 4, 64, ["fill"], (0, 20, 0), None, (0, 100, 3), None, None, None))
+                errors.append(
+                    "CONTAINER_BORDER_IMAGE_SLICE requires CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE_WIDTH."
+                )
+
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTAINER_BORDER_IMAGE_SLICE",
+                    values=self._CONTAINER_BORDER_IMAGE_SLICE,
+                    max_values=4,
+                    max_length=64,
+                    allowed_terms=["fill"],
+                    unitless_bounds=(0, 20, 0),
+                    px_bounds=None,
+                    percent_bounds=(0, 100, 3),
+                    vh_bounds=None,
+                    hw_bounds=None,
+                    rem_bounds=None,
+                )
+            )
+
         if self._CONTAINER_BORDER_IMAGE_WIDTH:
             if not self._CONTAINER_BORDER_IMAGE:
                 errors.append("CONTAINER_BORDER_IMAGE_WIDTH requires CONTAINER_BORDER_IMAGE.")
-            errors.extend(self._check_css_size("CONTAINER_BORDER_IMAGE_WIDTH", self._CONTAINER_BORDER_IMAGE_WIDTH, 4, 64, ["auto"], (0, 20, 0), (0, 30, 0), (0, 100, 3), None, None, None))
+
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTAINER_BORDER_IMAGE_WIDTH",
+                    values=self._CONTAINER_BORDER_IMAGE_WIDTH,
+                    max_values=4,
+                    max_length=64,
+                    allowed_terms=["auto"],
+                    unitless_bounds=(0, 20, 0),
+                    px_bounds=(0, 30, 0),
+                    percent_bounds=(0, 100, 3),
+                    vh_bounds=None,
+                    hw_bounds=None,
+                    rem_bounds=None,
+                )
+            )
+
         if self._CONTAINER_BORDER_IMAGE_OUTSET:
             if not self._CONTAINER_BORDER_IMAGE or not self._CONTAINER_BORDER_IMAGE_WIDTH:
-                errors.append("CONTAINER_BORDER_IMAGE_OUTSET requires CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE_WIDTH.")
-            errors.extend(self._check_css_size("CONTAINER_BORDER_IMAGE_OUTSET", self._CONTAINER_BORDER_IMAGE_OUTSET, 4, 64, ["auto"], (0, 20, 0), (0, 30, 0), None, None, None, None))
+                errors.append(
+                    "CONTAINER_BORDER_IMAGE_OUTSET requires CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE_WIDTH."
+                )
+
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTAINER_BORDER_IMAGE_OUTSET",
+                    values=self._CONTAINER_BORDER_IMAGE_OUTSET,
+                    max_values=4,
+                    max_length=64,
+                    allowed_terms=["auto"],
+                    unitless_bounds=(0, 20, 0),
+                    px_bounds=(0, 30, 0),
+                    percent_bounds=None,
+                    vh_bounds=None,
+                    hw_bounds=None,
+                    rem_bounds=None,
+                )
+            )
+
         if self._CONTAINER_BORDER_IMAGE_REPEAT:
             if not self._CONTAINER_BORDER_IMAGE or not self._CONTAINER_BORDER_IMAGE_WIDTH:
-                errors.append("CONTAINER_BORDER_IMAGE_REPEAT requires CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE_WIDTH.")
-            errors.extend(self._check_css_size("CONTAINER_BORDER_IMAGE_REPEAT", self._CONTAINER_BORDER_IMAGE_REPEAT, 2, 32, ["stretch", "repeat", "round", "space"], None, None, None, None, None, None))
+                errors.append(
+                    "CONTAINER_BORDER_IMAGE_REPEAT requires CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE_WIDTH."
+                )
+
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTAINER_BORDER_IMAGE_REPEAT",
+                    values=self._CONTAINER_BORDER_IMAGE_REPEAT,
+                    max_values=2,
+                    max_length=32,
+                    allowed_terms=["stretch", "repeat", "round", "space"],
+                    unitless_bounds=None,
+                    px_bounds=None,
+                    percent_bounds=None,
+                    vh_bounds=None,
+                    hw_bounds=None,
+                    rem_bounds=None,
+                )
+            )
+
         if self._CONTAINER_BORDER_COLOR:
             if not self._CONTAINER_BORDER_WIDTH or not self._CONTAINER_BORDER_STYLE:
                 errors.append("CONTAINER_BORDER_COLOR requires CONTAINER_BORDER_WIDTH and CONTAINER_BORDER_STYLE.")
-            errors.extend(self._check_css_color("CONTAINER_BORDER_COLOR", self._CONTAINER_BORDER_COLOR, 4, 120))
+
+            errors.extend(
+                self._check_css_color(
+                    rule="CONTAINER_BORDER_COLOR",
+                    values=self._CONTAINER_BORDER_COLOR,
+                    max_values=4,
+                    max_length=120,
+                )
+            )
+
         if self._CONTAINER_BORDER_WIDTH:
             if not self._CONTAINER_BORDER_STYLE:
                 errors.append("CONTAINER_BORDER_WIDTH requires CONTAINER_BORDER_STYLE.")
-            errors.extend(self._check_css_size("CONTAINER_BORDER_WIDTH", self._CONTAINER_BORDER_WIDTH, 4, 64, [], (0, 30, 0), (0, 30, 0), (0, 100, 3), (0, 100, 4), (0, 100, 4), (0, 10, 4)))
+
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTAINER_BORDER_WIDTH",
+                    values=self._CONTAINER_BORDER_WIDTH,
+                    max_values=4,
+                    max_length=64,
+                    allowed_terms=[],
+                    unitless_bounds=(0, 30, 0),
+                    px_bounds=(0, 30, 0),
+                    percent_bounds=(0, 100, 3),
+                    vh_bounds=(0, 100, 4),
+                    hw_bounds=(0, 100, 4),
+                    rem_bounds=(0, 10, 4),
+                )
+            )
+
         if self._CONTAINER_BORDER_STYLE:
             if not self._CONTAINER_BORDER_WIDTH:
                 errors.append("CONTAINER_BORDER_STYLE requires CONTAINER_BORDER_WIDTH.")
-            if any(style not in ["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"] for style in self._CONTAINER_BORDER_STYLE):
-                errors.append('CONTAINER_BORDER_STYLE must be "dotted", "dashed", "solid", "double", "groove", "ridge", "inset", or "outset".')
+
+            valid_styles = ["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]
+
+            if any(style not in valid_styles for style in self._CONTAINER_BORDER_STYLE):
+                errors.append(
+                    'CONTAINER_BORDER_STYLE must be "dotted", "dashed", "solid", "double", "groove", "ridge", "inset", or "outset".'
+                )
+
         if self._CONTAINER_BORDER_RADIUS:
-            errors.extend(self._check_css_size("CONTAINER_BORDER_RADIUS", self._CONTAINER_BORDER_RADIUS, 4, 64, [], (0, 200, 0), (0, 200, 0), (0, 50, 3), (0, 40, 4), (0, 40, 4), (0, 30, 4)))
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTAINER_BORDER_RADIUS",
+                    values=self._CONTAINER_BORDER_RADIUS,
+                    max_values=4,
+                    max_length=64,
+                    allowed_terms=[],
+                    unitless_bounds=(0, 200, 0),
+                    px_bounds=(0, 200, 0),
+                    percent_bounds=(0, 50, 3),
+                    vh_bounds=(0, 40, 4),
+                    hw_bounds=(0, 40, 4),
+                    rem_bounds=(0, 30, 4),
+                )
+            )
+
         if self._CONTAINER_SHADOW_COLOR:
-            if not self._CONTAINER_SHADOW_OFFSET and not self._CONTAINER_SHADOW_SPREAD and not self._CONTAINER_SHADOW_BLUR:
-                errors.append("CONTAINER_SHADOW_COLOR requires CONTAINER_SHADOW_OFFSET, CONTAINER_SHADOW_SPREAD, or CONTAINER_SHADOW_BLUR.")
-            errors.extend(self._check_css_color("CONTAINER_SHADOW_COLOR", self._CONTAINER_SHADOW_COLOR, 1, 32))
+            if (
+                not self._CONTAINER_SHADOW_OFFSET
+                and not self._CONTAINER_SHADOW_SPREAD
+                and not self._CONTAINER_SHADOW_BLUR
+            ):
+                errors.append(
+                    "CONTAINER_SHADOW_COLOR requires CONTAINER_SHADOW_OFFSET, CONTAINER_SHADOW_SPREAD, or CONTAINER_SHADOW_BLUR."
+                )
+
+            errors.extend(
+                self._check_css_color(
+                    rule="CONTAINER_SHADOW_COLOR", values=self._CONTAINER_SHADOW_COLOR, max_values=1, max_length=32
+                )
+            )
+
         if self._CONTAINER_SHADOW_OFFSET:
             if not self._CONTAINER_SHADOW_COLOR:
                 errors.append("CONTAINER_SHADOW_OFFSET requires CONTAINER_SHADOW_COLOR.")
-            errors.extend(self._check_css_size("CONTAINER_SHADOW_OFFSET", self._CONTAINER_SHADOW_OFFSET, 2, 32, [], (-15, 15, 0), (-15, 15, 0), (-5, 5, 3), (-2, 2, 4), (-2, 2, 4), (-4, 2, 4)))
+
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTAINER_SHADOW_OFFSET",
+                    values=self._CONTAINER_SHADOW_OFFSET,
+                    max_values=2,
+                    max_length=32,
+                    allowed_terms=[],
+                    unitless_bounds=(-15, 15, 0),
+                    px_bounds=(-15, 15, 0),
+                    percent_bounds=(-5, 5, 3),
+                    vh_bounds=(-2, 2, 4),
+                    hw_bounds=(-2, 2, 4),
+                    rem_bounds=(-4, 2, 4),
+                )
+            )
+
         if self._CONTAINER_SHADOW_SPREAD:
             if not self._CONTAINER_SHADOW_COLOR:
                 errors.append("CONTAINER_SHADOW_SPREAD requires CONTAINER_SHADOW_COLOR.")
-            errors.extend(self._check_css_size("CONTAINER_SHADOW_SPREAD", self._CONTAINER_SHADOW_SPREAD, 1, 12, [], (0, 30, 0), (0, 30, 0), (0, 10, 3), (0, 5, 4), (0, 5, 4), (0, 3, 4)))
+
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTAINER_SHADOW_SPREAD",
+                    values=self._CONTAINER_SHADOW_SPREAD,
+                    max_values=1,
+                    max_length=12,
+                    allowed_terms=[],
+                    unitless_bounds=(0, 30, 0),
+                    px_bounds=(0, 30, 0),
+                    percent_bounds=(0, 10, 3),
+                    vh_bounds=(0, 5, 4),
+                    hw_bounds=(0, 5, 4),
+                    rem_bounds=(0, 3, 4),
+                )
+            )
+
         if self._CONTAINER_SHADOW_BLUR:
             if not self._CONTAINER_SHADOW_COLOR:
                 errors.append("CONTAINER_SHADOW_BLUR requires CONTAINER_SHADOW_COLOR.")
-            errors.extend(self._check_css_size("CONTAINER_SHADOW_BLUR", self._CONTAINER_SHADOW_BLUR, 1, 12, [], (0, 30, 0), (0, 30, 0), (0, 10, 3), (0, 5, 4), (0, 5, 4), (0, 3, 4)))
+
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTAINER_SHADOW_BLUR",
+                    values=self._CONTAINER_SHADOW_BLUR,
+                    max_values=1,
+                    max_length=12,
+                    allowed_terms=[],
+                    unitless_bounds=(0, 30, 0),
+                    px_bounds=(0, 30, 0),
+                    percent_bounds=(0, 10, 3),
+                    vh_bounds=(0, 5, 4),
+                    hw_bounds=(0, 5, 4),
+                    rem_bounds=(0, 3, 4),
+                )
+            )
+
         if self._CONTENT_FONT:
             if len(" ".join(self._CONTENT_FONT)) > 1_000:
                 errors.append("CONTENT_FONT must be 1,000 characters or less.")
+
             if len(self._CONTENT_FONT) > 2:
                 errors.append("CONTENT_FONT must have 2 values or less.")
+
         if self._CONTENT_FONT_WEIGHT:
             if len(" ".join(self._CONTENT_FONT_WEIGHT)) > 24:
                 errors.append("CONTENT_FONT_WEIGHT must have a total length of 24 characters or less.")
+
             if len(self._CONTENT_FONT_WEIGHT) > 2:
                 errors.append("CONTENT_FONT_WEIGHT must have 2 values or less.")
-            if any(weight not in ["bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"] for weight in self._CONTENT_FONT_WEIGHT):
-                errors.append('CONTENT_FONT_WEIGHT must be "bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", or "900".')
+
+            valid_weights = [
+                "bold",
+                "bolder",
+                "lighter",
+                "normal",
+                "100",
+                "200",
+                "300",
+                "400",
+                "500",
+                "600",
+                "700",
+                "800",
+                "900",
+            ]
+
+            if any(weight not in valid_weights for weight in self._CONTENT_FONT_WEIGHT):
+                errors.append(
+                    'CONTENT_FONT_WEIGHT must be "bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", or "900".'
+                )
+
         if self._CONTENT_TEXT_DIRECTION and self._CONTENT_TEXT_DIRECTION not in ["ltr", "rtl"]:
             errors.append('CONTENT_TEXT_DIRECTION must be "ltr" or "rtl".')
+
         if self._CONTENT_TEXT_SIZE:
-            errors.extend(self._check_css_size("CONTENT_TEXT_SIZE", self._CONTENT_TEXT_SIZE, 12, 128, [], (0, 0, 0), (8, 64, 0), (10, 500, 3), (2, 10, 4), (2, 10, 4), (0.3, 8, 4)))
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTENT_TEXT_SIZE",
+                    values=self._CONTENT_TEXT_SIZE,
+                    max_values=12,
+                    max_length=128,
+                    allowed_terms=[],
+                    unitless_bounds=(0, 0, 0),
+                    px_bounds=(8, 64, 0),
+                    percent_bounds=(10, 500, 3),
+                    vh_bounds=(2, 10, 4),
+                    hw_bounds=(2, 10, 4),
+                    rem_bounds=(0.3, 8, 4),
+                )
+            )
+
         if self._CONTENT_TEXT_ALIGN and self._CONTENT_TEXT_ALIGN not in ["right", "center", "justify"]:
             errors.append('CONTENT_TEXT_ALIGN must be "right", "center", or "justify".')
+
         if self._CONTENT_TEXT_SHADOW_COLOR:
             if not self._CONTENT_TEXT_SHADOW_OFFSET:
                 errors.append("CONTENT_TEXT_SHADOW_COLOR requires CONTENT_TEXT_SHADOW_OFFSET.")
-            errors.extend(self._check_css_color("CONTENT_TEXT_SHADOW_COLOR", self._CONTENT_TEXT_SHADOW_COLOR, 1, 32))
+
+            errors.extend(
+                self._check_css_color(
+                    rule="CONTENT_TEXT_SHADOW_COLOR",
+                    values=self._CONTENT_TEXT_SHADOW_COLOR,
+                    max_values=1,
+                    max_length=32,
+                )
+            )
+
         if self._CONTENT_TEXT_SHADOW_OFFSET:
             if not self._CONTENT_TEXT_SHADOW_COLOR:
                 errors.append("CONTENT_TEXT_SHADOW_OFFSET requires CONTENT_TEXT_SHADOW_COLOR.")
-            errors.extend(self._check_css_size("CONTENT_TEXT_SHADOW_OFFSET", self._CONTENT_TEXT_SHADOW_OFFSET, 2, 32, [], (-15, 15, 0), (-15, 15, 0), (-5, 5, 3), (-2, 2, 4), (-2, 2, 4), (-2, 2, 4)))
+
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTENT_TEXT_SHADOW_OFFSET",
+                    values=self._CONTENT_TEXT_SHADOW_OFFSET,
+                    max_values=2,
+                    max_length=32,
+                    allowed_terms=[],
+                    unitless_bounds=(-15, 15, 0),
+                    px_bounds=(-15, 15, 0),
+                    percent_bounds=(-5, 5, 3),
+                    vh_bounds=(-2, 2, 4),
+                    hw_bounds=(-2, 2, 4),
+                    rem_bounds=(-2, 2, 4),
+                )
+            )
+
         if self._CONTENT_TEXT_SHADOW_BLUR:
             if not self._CONTENT_TEXT_SHADOW_COLOR or not self._CONTENT_TEXT_SHADOW_OFFSET:
-                errors.append("CONTENT_TEXT_SHADOW_BLUR requires CONTENT_TEXT_SHADOW_COLOR and CONTENT_TEXT_SHADOW_OFFSET.")
-            errors.extend(self._check_css_size("CONTENT_TEXT_SHADOW_BLUR", self._CONTENT_TEXT_SHADOW_BLUR, 1, 12, [], (0, 30, 0), (0, 30, 0), (0, 10, 3), (0, 5, 4), (0, 5, 4), (0, 3, 4)))
+                errors.append(
+                    "CONTENT_TEXT_SHADOW_BLUR requires CONTENT_TEXT_SHADOW_COLOR and CONTENT_TEXT_SHADOW_OFFSET."
+                )
+
+            errors.extend(
+                self._check_css_size(
+                    rule="CONTENT_TEXT_SHADOW_BLUR",
+                    values=self._CONTENT_TEXT_SHADOW_BLUR,
+                    max_values=1,
+                    max_length=12,
+                    allowed_terms=[],
+                    unitless_bounds=(0, 30, 0),
+                    px_bounds=(0, 30, 0),
+                    percent_bounds=(0, 10, 3),
+                    vh_bounds=(0, 5, 4),
+                    hw_bounds=(0, 5, 4),
+                    rem_bounds=(0, 3, 4),
+                )
+            )
+
         if self._CONTENT_TEXT_COLOR:
-            errors.extend(self._check_css_color("CONTENT_TEXT_COLOR", self._CONTENT_TEXT_COLOR, 2, 128))
+            errors.extend(
+                self._check_css_color(
+                    rule="CONTENT_TEXT_COLOR",
+                    values=self._CONTENT_TEXT_COLOR,
+                    max_values=2,
+                    max_length=128,
+                )
+            )
+
         if self._CONTENT_LINK_COLOR:
-            errors.extend(self._check_css_color("CONTENT_LINK_COLOR", self._CONTENT_LINK_COLOR, 2, 16))
+            errors.extend(
+                self._check_css_color(
+                    rule="CONTENT_LINK_COLOR",
+                    values=self._CONTENT_LINK_COLOR,
+                    max_values=2,
+                    max_length=16,
+                )
+            )
+
         if self._CONTENT_BULLET_COLOR:
-            errors.extend(self._check_css_color("CONTENT_BULLET_COLOR", self._CONTENT_BULLET_COLOR, 2, 16))
+            errors.extend(
+                self._check_css_color(
+                    rule="CONTENT_BULLET_COLOR",
+                    values=self._CONTENT_BULLET_COLOR,
+                    max_values=2,
+                    max_length=16,
+                )
+            )
+
         if self._CONTENT_LINK_BEHAVIOR:
             if len(self._CONTENT_LINK_BEHAVIOR) > 2:
                 errors.append("CONTENT_LINK_BEHAVIOR must have 2 values or less.")
+
             if any(behavior not in ["same", "new"] for behavior in self._CONTENT_LINK_BEHAVIOR):
                 errors.append('CONTENT_LINK_BEHAVIOR must be "same" or "new".')
 
         if errors:
-            raise RentryInvalidMetadataError(("\n" if len(errors) > 1 else "") + "\n".join(errors))
+            raise RentryInvalidMetadataError("\n".join(errors))
 
     def encode(self) -> str:
         """
@@ -1461,9 +2083,12 @@ class RentryPageMetadata:
         def encode_value(val):
             if isinstance(val, list):
                 return " ".join(val)
+
             return val
 
-        return json.dumps({key.removeprefix("_"): encode_value(val) for key, val in self.__dict__.items() if val is not None})
+        return json.dumps(
+            {key.removeprefix("_"): encode_value(val) for key, val in self.__dict__.items() if val is not None}
+        )
 
     def decode(self, data: str | dict[str, Any]) -> None:
         """
@@ -1506,6 +2131,7 @@ class RentryPageMetadata:
 
         metadata = RentryPageMetadata()
         metadata.decode(data_json)
+
         return metadata
 
     def __bool__(self) -> bool:

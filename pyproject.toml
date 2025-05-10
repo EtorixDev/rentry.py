@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rentry.py"
-version = "0.2.6"
+version = "0.2.7"
 description = "A python wrapper for the rentry markdown service."
 authors = ["Etorix <admin@etorix.dev>"]
 packages = [{include = "rentry"}]
@@ -34,4 +34,4 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
-line-length = 320
+line-length = 120
