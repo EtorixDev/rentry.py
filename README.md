@@ -139,7 +139,7 @@ If you would like to identify yourself to the rentry API, you can do so by passi
 sync_client = RentrySyncClient(user_agent = "My Cool Project")
 ```
 
-This will make your request appear as `rentry.py/<version> (My Cool Project)` to the API.
+This will make your request appear as `My-Cool-Project rentry.py/x.y.z (PyPI)` to the API.
 
 This is not required and at this time it is unknown if rentry will even make use of this information in any way.
 

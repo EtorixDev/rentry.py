@@ -35,7 +35,7 @@ class RentryBase:
         self.base_url: str = base_url.strip("/")
         self.csrf_token: Optional[str] = csrf_token
         self.auth_token: Optional[str] = auth_token
-        self.user_agent: Optional[str] = user_agent
+        self._user_agent: Optional[str] = user_agent.strip().replace(" ", "-") if user_agent else None
         self.use_session: bool = use_session
 
         if not csrf_token:
@@ -52,12 +52,20 @@ class RentryBase:
         return {"csrfmiddlewaretoken": self.csrf_token}
 
     @property
+    def user_agent(self) -> str:
+        """User-Agent to be sent with every request. Includes the package name and version."""
+        if self._user_agent:
+            return f"{self._user_agent} {USER_AGENT}"
+        else:
+            return f"{USER_AGENT}"
+
+    @property
     def headers(self) -> dict:
         """Headers to be sent with every request. Contains the Referer, rentry-auth, and User-Agent headers."""
         return {
             "Referer": self.base_url,
             "rentry-auth": self.auth_token if self.auth_token else "",
-            "User-Agent": f"{USER_AGENT}" + (f" ({self.user_agent})" if self.user_agent else ""),
+            "User-Agent": self.user_agent,
         }
 
     def refresh_session(self) -> str:
@@ -254,7 +262,7 @@ class RentrySyncClient(RentryBase):
             through the API.
         - Contact rentry support to request a token.
     - user_agent: `Optional[str] = None` — The User-Agent to be sent with every request to identify the client.
-        - Appended in parentheses to the default User-Agent which consists of the package name and version.
+        - The package name and version will always be included in the User-Agent.
     - use_session: `bool = True` — Whether to use the same CSRF token between requests.
         - If False, the session details will be refreshed before every request.
         - This will double the number of requests made to the rentry API.
@@ -282,6 +290,7 @@ class RentrySyncClient(RentryBase):
     - cookies: `dict` — The cookies to be sent with every request. Only contains the CSRF token.
     - payload: `dict` — The payload to be sent with every request. Only contains the CSRF token.
     - headers: `dict` — The headers to be sent with every request. Contains the Referer and rentry-auth headers.
+    - user_agent: `str` — The User-Agent to be sent with every request. Includes the package name and version.
     """
 
     def __init__(
@@ -874,7 +883,7 @@ class RentryAsyncClient(RentryBase):
             through the API.
         - Contact rentry support to request a token.
     - user_agent: `Optional[str] = None` — The User-Agent to be sent with every request to identify the client.
-        - Appended in parentheses to the default User-Agent which consists of the package name and version.
+        - The package name and version will always be included in the User-Agent.
     - use_session: `bool = True` — Whether to use the same CSRF token between requests.
         - If False, the session details will be refreshed before every request.
         - This will double the number of requests made to the rentry API.
@@ -902,6 +911,7 @@ class RentryAsyncClient(RentryBase):
     - cookies: `dict` — The cookies to be sent with every request. Only contains the CSRF token.
     - payload: `dict` — The payload to be sent with every request. Only contains the CSRF token.
     - headers: `dict` — The headers to be sent with every request. Contains the Referer and rentry-auth headers.
+    - user_agent: `str` — The User-Agent to be sent with every request. Includes the package name and version.
     """
 
     def __init__(

@@ -1,6 +1,6 @@
 import re
 
-USER_AGENT = "rentry.py/0.2.8"
+USER_AGENT = "rentry.py/0.2.9 (PyPI)"
 
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 SECRET_REGEX = re.compile(r"\|\|\s([a-f0-9]{32})\s\|\|\s(\d{1,2}\s[A-Za-z]{3}\s\d{4})\s\|\|")
