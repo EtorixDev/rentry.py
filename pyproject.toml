@@ -31,7 +31,8 @@ dev = [
 [project.urls]
 Homepage = "https://pypi.org/project/rentry.py/"
 Repository = "https://github.com/EtorixDev/rentry.py/"
-Funding = "https://github.com/sponsors/EtorixDev"
+Sponsor = "https://github.com/sponsors/EtorixDev"
+Donate = "https://ko-fi.com/Etorix"
 
 [project.scripts]
 rentry = "rentry.cli:main"
