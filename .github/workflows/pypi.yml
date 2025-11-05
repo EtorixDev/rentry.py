@@ -21,7 +21,7 @@ jobs:
             - name: Build and Publish
               shell: bash
               env:
-                  UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+                  UV_PUBLISH_TOKEN: ${{ secrets.UV_PUBLISH_TOKEN }}
               run: |
                   uv build
                   uv publish
