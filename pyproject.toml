@@ -1,13 +1,11 @@
-[tool.poetry]
+[project]
 name = "rentry.py"
-version = "0.2.9"
+version = "0.3.9"
 description = "A python wrapper for the rentry markdown service."
-authors = ["Etorix <admin@etorix.dev>"]
-packages = [{include = "rentry"}]
+authors = [{name = "Etorix", email = "admin@etorix.dev"}]
 license = "MIT"
 readme = "README.md"
-homepage = "https://pypi.org/project/rentry.py/"
-repository = "https://github.com/EtorixDev/rentry.py/"
+requires-python = ">=3.9"
 keywords = ["rentry", "markdown", "api", "wrapper", "command line", "synchronous", "asynchronous"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
@@ -16,22 +14,37 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13"
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14"
+]
+dependencies = [
+    "httpx>=0.28.1"
 ]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-httpx = "^0.28.1"
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.3",
+]
 
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.9.6"
+[project.urls]
+Homepage = "https://pypi.org/project/rentry.py/"
+Repository = "https://github.com/EtorixDev/rentry.py/"
+Funding = "https://github.com/sponsors/EtorixDev"
 
-[tool.poetry.scripts]
+[project.scripts]
 rentry = "rentry.cli:main"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+allow-insecure-host = ["files.pythonhosted.org", "pypi.org"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["rentry"]
 
 [tool.ruff]
 line-length = 120

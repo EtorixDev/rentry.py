@@ -85,9 +85,7 @@ class RentryArgumentParser(ArgumentParser):
 
 def main() -> None:
     client: RentrySyncClient = RentrySyncClient()
-    parser: ArgumentParser = RentryArgumentParser(
-        prog="rentry", usage=USAGE, description="Access the rentry API through the command line."
-    )
+    parser: ArgumentParser = RentryArgumentParser(prog="rentry", usage=USAGE, description="Access the rentry API through the command line.")
     parser.add_argument("command", type=str, nargs="?", help="The command to run.")
     parser.add_argument("--page-id", type=str, help="The page ID to use.")
     parser.add_argument("--edit-code", type=str, help="The edit code to use.")
@@ -113,18 +111,14 @@ def main() -> None:
     try:
         args: dict[str, Any] = vars(parser.parse_args())
         command: Optional[str] = args.get("command")
-        page_id: Optional[str] = (
-            cast(str, pid).split("/")[-1].strip() if (pid := args.get("page_id")) is not None else None
-        )
+        page_id: Optional[str] = cast(str, pid).split("/")[-1].strip() if (pid := args.get("page_id")) is not None else None
         edit_code: Optional[str] = args.get("edit_code")
         auth_token: Optional[str] = args.get("auth_token")
         new_page_id: Optional[str] = args.get("new_page_id")
         new_edit_code: Optional[str] = args.get("new_edit_code")
         new_modify_code: Optional[str] = args.get("new_modify_code")
         markdown: Optional[str] = args.get("markdown")
-        metadata: Optional[RentryPageMetadata] = (
-            RentryPageMetadata.build(mtdt) if (mtdt := args.get("metadata")) else None
-        )
+        metadata: Optional[RentryPageMetadata] = RentryPageMetadata.build(mtdt) if (mtdt := args.get("metadata")) else None
         overwrite: bool = args.get("overwrite") or False
         base_url: str = args.get("base_url") or "https://rentry.co"
 
@@ -143,9 +137,7 @@ def main() -> None:
             print(markdown)
         elif command == "fetch":
             if not page_id or not edit_code:
-                print(
-                    "You must provide a page ID with the --page-id argument and an edit code (or modify code) with the --edit-code argument."
-                )
+                print("You must provide a page ID with the --page-id argument and an edit code (or modify code) with the --edit-code argument.")
                 return
             elif auth_token or new_page_id or new_edit_code or new_modify_code or markdown or metadata or overwrite:
                 print('More arguments than expected for the "fetch" command. Use "rentry help" for more information.')
@@ -153,41 +145,25 @@ def main() -> None:
 
             page: RentrySyncPage = client.fetch(page_id, edit_code)
             is_modify_code: bool = edit_code.lower().startswith("m:")
-            f_out_page_id: str = f"├───── Page ID: {page_id}"
+            f_out_page_id: str = f"├───── Page ID: {page.page_id}"
             f_out_edit_code: Optional[str] = f"├─── Edit Code: {edit_code}" if not is_modify_code else None
             f_out_modify_code: Optional[str] = f"├─ Modify Code: {edit_code}" if is_modify_code else None
             f_out_stats: Optional[str] = "├─────── Stats:" if page.stats else None
-            f_out_metadata: str = (
-                f"├──── Metadata: {page.metadata.encode()}" if bool(page.metadata) else "├──── Metadata: None"
-            )
-            f_out_markdown: Optional[str] = (
-                f"├──── Markdown:─┐\n                ↓\n{page.markdown}" if page.markdown else "├──── Markdown: None"
-            )
+            f_out_metadata: str = f"├──── Metadata: {page.metadata.encode()}" if bool(page.metadata) else "├──── Metadata: None"
+            f_out_markdown: Optional[str] = f"├──── Markdown:─┐\n                ↓\n{page.markdown}" if page.markdown else "├──── Markdown: None"
 
-            f_out_modify_code_set: Optional[str] = (
-                f"│        ├── Modify Code Set: {page.stats.modify_code_set}" if page.stats else None
-            )
+            f_out_modify_code_set: Optional[str] = f"│        ├── Modify Code Set: {page.stats.modify_code_set}" if page.stats else None
             f_out_published_date: Optional[str] = (
-                f"│        ├─── Published Date: {page.stats.published_date.strftime('%B %d, %Y %H:%M:%S')}"
-                if page.stats and page.stats.published_date
-                else None
+                f"│        ├─── Published Date: {page.stats.published_date.strftime('%B %d, %Y %H:%M:%S')}" if page.stats and page.stats.published_date else None
             )
             f_out_activated_date: Optional[str] = (
-                f"│         ├─── Activated Date: {page.stats.activated_date.strftime('%B %d, %Y %H:%M:%S')}"
-                if page.stats and page.stats.activated_date
-                else None
+                f"│         ├─── Activated Date: {page.stats.activated_date.strftime('%B %d, %Y %H:%M:%S')}" if page.stats and page.stats.activated_date else None
             )
             f_out_edited_date: Optional[str] = (
-                f"│        ├────── Edited Date: {page.stats.edited_date.strftime('%B %d, %Y %H:%M:%S')}"
-                if page.stats and page.stats.edited_date
-                else None
+                f"│        ├────── Edited Date: {page.stats.edited_date.strftime('%B %d, %Y %H:%M:%S')}" if page.stats and page.stats.edited_date else None
             )
-            f_out_metadata_version: Optional[str] = (
-                f"│        ├─ Metadata Version: {page.stats.metadata_version}" if page.stats else None
-            )
-            f_out_view_count: Optional[str] = (
-                f"│        ├─────── View Count: {page.stats.views}" if page.stats else None
-            )
+            f_out_metadata_version: Optional[str] = f"│        ├─ Metadata Version: {page.stats.metadata_version}" if page.stats else None
+            f_out_view_count: Optional[str] = f"│        ├─────── View Count: {page.stats.views}" if page.stats else None
             f_stats: list[str] = [
                 stat
                 for stat in [
@@ -225,16 +201,7 @@ def main() -> None:
             if not page_id:
                 print("You must provide a page ID with the --page-id argument.")
                 return
-            elif (
-                edit_code
-                or auth_token
-                or new_page_id
-                or new_edit_code
-                or new_modify_code
-                or markdown
-                or metadata
-                or overwrite
-            ):
+            elif edit_code or auth_token or new_page_id or new_edit_code or new_modify_code or markdown or metadata or overwrite:
                 print('More arguments than expected for the "exists" command. Use "rentry help" for more information.')
 
             exists: bool = client.exists(page_id)
@@ -251,9 +218,7 @@ def main() -> None:
             print(f" Page URL: {page.page_url}\nEdit Code: {page.edit_code}\n Markdown: \n\n{page.markdown}")
         elif command == "delete":
             if not page_id or not edit_code:
-                print(
-                    "You must provide a page ID with the --page-id argument and an edit code with the --edit-code argument."
-                )
+                print("You must provide a page ID with the --page-id argument and an edit code with the --edit-code argument.")
                 return
             elif auth_token or new_page_id or new_edit_code or new_modify_code or markdown or metadata or overwrite:
                 print('More arguments than expected for the "delete" command. Use "rentry help" for more information.')
@@ -263,9 +228,7 @@ def main() -> None:
             print(f"{page.page_url} has been deleted.")
         elif command == "update":
             if not page_id or not edit_code:
-                print(
-                    "You must provide a page ID with the --page-id argument and an edit or modify code with the --edit-code argument."
-                )
+                print("You must provide a page ID with the --page-id argument and an edit or modify code with the --edit-code argument.")
                 return
             elif auth_token:
                 print('More arguments than expected for the "update" command. Use "rentry help" for more information.')
@@ -277,28 +240,18 @@ def main() -> None:
                 print("Modify codes can't update the page ID, edit code, or modify code.")
                 return
 
-            passed_values: list[str] = [
-                arg for arg in [new_page_id, new_edit_code, new_modify_code, markdown, metadata] if arg is not None
-            ]
+            passed_values: list[str] = [arg for arg in [new_page_id, new_edit_code, new_modify_code, markdown, metadata] if arg is not None]
 
             if not passed_values:
                 print(f"{base_url}/{page_id} has not been updated due to no values being provided.")
                 return
 
-            page: RentrySyncPage = client.update(
-                page_id, edit_code, new_page_id, new_edit_code, new_modify_code, markdown, metadata, overwrite
-            )
+            page: RentrySyncPage = client.update(page_id, edit_code, new_page_id, new_edit_code, new_modify_code, markdown, metadata, overwrite)
             u_out_new_page_id: Optional[str] = f"├───── Page ID: {page.page_id}" if new_page_id else None
             u_out_new_edit_code: Optional[str] = f"├─── Edit Code: {page.edit_code}" if new_edit_code else None
             u_out_new_modify_code: Optional[str] = f"├─ Modify Code: {page.modify_code}" if new_modify_code else None
             u_out_metadata: Optional[str] = f"├──── Metadata: {page.metadata.encode()}" if bool(metadata) else None
-            u_out_markdown: Optional[str] = (
-                f"├──── Markdown:─┐\n                ↓\n{page.markdown}"
-                if page.markdown
-                else "├──── Markdown: Cleared"
-                if overwrite
-                else None
-            )
+            u_out_markdown: Optional[str] = f"├──── Markdown:─┐\n                ↓\n{page.markdown}" if page.markdown else "├──── Markdown: Cleared" if overwrite else None
             u_modified_values: list[str] = [
                 value
                 for value in [
@@ -312,9 +265,7 @@ def main() -> None:
             ]
 
             u_modified_values[-1] = "└".join(u_modified_values[-1].split("├", 1))
-            output: str = (
-                f"\n{page.page_url} has been updated with the following values:\n" + "\n".join(u_modified_values) + "\n"
-            )
+            output: str = f"\n{page.page_url} has been updated with the following values:\n" + "\n".join(u_modified_values) + "\n"
             print(output)
         else:
             print('Invalid command. Use "rentry help" for more information.')

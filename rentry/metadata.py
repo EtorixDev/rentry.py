@@ -380,6 +380,25 @@ class RentryPageMetadata:
             - 1 value applies to all links.
             - 2 values apply to internal and external links, respectively.
         - Must be "same" or "new".
+    - SAFETY_PAGE_WARNING: `Optional[list[Literal["adult", "sensitive", "epilepsy", "custom"]]]` — Adds a warning popup to your page before allowing visitors to view.
+        - The total length of all values, including conjoining spaces, must be 100 characters or less.
+        - Up to 4 values can be provided.
+        - Must be "adult", "sensitive", "epilepsy", or "custom".
+    - SAFETY_PAGE_WARNING_DESCRIPTION: `Optional[str]` — Provide your own text to the warning popup created by SAFETY_PAGE_WARNING.
+        - Must be 240 characters or less.
+    - SAFETY_MEDIA_BLUR: `Optional[bool]` — Blurs all images in your page and requires them to be clicked before showing.
+        - Allows you to display sensitive images that some viewers may prefer not to see.
+    - SAFETY_LINK_WARNING: `Optional[list[Literal["adult", "epilepsy", "sensitive"]]]` — Triggers a popup when clicking on a link within your content.
+        - The total length of all values, including conjoining spaces, must be 100 characters or less.
+        - Up to 3 values can be provided.
+        - Must be "adult", "epilepsy", or "sensitive".
+    - SAFETY_LINK_WARNING_DESCRIPTION: `Optional[str]` — Provide your own text to the link warning popup.
+        - Must be 240 characters or less.
+    - SAFETY_PAGE_FLAG: `Optional[list[Literal["adult", "epilepsy", "sensitive"]]]` — Creates a visual icon on your page to inform readers that a page contains certain material.
+        - Similar to SAFETY_PAGE_WARNING, except it does not trigger a popup.
+        - The total length of all values, including conjoining spaces, must be 100 characters or less.
+        - Up to 3 values can be provided.
+        - Must be "adult", "epilepsy", or "sensitive".
 
     #### Methods
     - `validate()` — Validate all locally validatable metadata attributes.
@@ -418,17 +437,13 @@ class RentryPageMetadata:
         CONTAINER_INNER_FOREGROUND_COLOR: Optional[list[str]] = None,
         CONTAINER_INNER_BACKGROUND_COLOR: Optional[list[str]] = None,
         CONTAINER_INNER_BACKGROUND_IMAGE: Optional[str] = None,
-        CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT: Optional[
-            Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]
-        ] = None,
+        CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]] = None,
         CONTAINER_INNER_BACKGROUND_IMAGE_POSITION: Optional[Literal["center", "left", "right", "top", "bottom"]] = None,
         CONTAINER_INNER_BACKGROUND_IMAGE_SIZE: Optional[Literal["contain", "cover"] | str] = None,
         CONTAINER_OUTER_FOREGROUND_COLOR: Optional[list[str]] = None,
         CONTAINER_OUTER_BACKGROUND_COLOR: Optional[list[str]] = None,
         CONTAINER_OUTER_BACKGROUND_IMAGE: Optional[str] = None,
-        CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT: Optional[
-            Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]
-        ] = None,
+        CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]] = None,
         CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION: Optional[Literal["center", "left", "right", "top", "bottom"]] = None,
         CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE: Optional[str] = None,
         CONTAINER_BORDER_IMAGE: Optional[str] = None,
@@ -438,22 +453,14 @@ class RentryPageMetadata:
         CONTAINER_BORDER_IMAGE_REPEAT: Optional[list[str]] = None,
         CONTAINER_BORDER_COLOR: Optional[list[str]] = None,
         CONTAINER_BORDER_WIDTH: Optional[list[str]] = None,
-        CONTAINER_BORDER_STYLE: Optional[
-            list[Literal["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]]
-        ] = None,
+        CONTAINER_BORDER_STYLE: Optional[list[Literal["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]]] = None,
         CONTAINER_BORDER_RADIUS: Optional[list[str]] = None,
         CONTAINER_SHADOW_COLOR: Optional[str] = None,
         CONTAINER_SHADOW_OFFSET: Optional[list[str]] = None,
         CONTAINER_SHADOW_SPREAD: Optional[str] = None,
         CONTAINER_SHADOW_BLUR: Optional[str] = None,
         CONTENT_FONT: Optional[list[str]] = None,
-        CONTENT_FONT_WEIGHT: Optional[
-            list[
-                Literal[
-                    "bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"
-                ]
-            ]
-        ] = None,
+        CONTENT_FONT_WEIGHT: Optional[list[Literal["bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"]]] = None,
         CONTENT_TEXT_DIRECTION: Optional[Literal["ltr", "rtl"]] = None,
         CONTENT_TEXT_SIZE: Optional[list[str]] = None,
         CONTENT_TEXT_ALIGN: Optional[Literal["right", "center", "justify"]] = None,
@@ -464,202 +471,110 @@ class RentryPageMetadata:
         CONTENT_LINK_COLOR: Optional[list[str]] = None,
         CONTENT_BULLET_COLOR: Optional[list[str]] = None,
         CONTENT_LINK_BEHAVIOR: Optional[list[Literal["same", "new"]]] = None,
+        SAFETY_PAGE_WARNING: Optional[list[Literal["adult", "sensitive", "epilepsy", "custom"]]] = None,
+        SAFETY_PAGE_WARNING_DESCRIPTION: Optional[str] = None,
+        SAFETY_MEDIA_BLUR: Optional[bool] = None,
+        SAFETY_LINK_WARNING: Optional[list[Literal["adult", "epilepsy", "sensitive"]]] = None,
+        SAFETY_LINK_WARNING_DESCRIPTION: Optional[str] = None,
+        SAFETY_PAGE_FLAG: Optional[list[Literal["adult", "epilepsy", "sensitive"]]] = None,
     ) -> None:
         self._PAGE_TITLE: Optional[str] = PAGE_TITLE.strip() if PAGE_TITLE and PAGE_TITLE.strip() else None
-        self._PAGE_DESCRIPTION: Optional[str] = (
-            PAGE_DESCRIPTION.strip() if PAGE_DESCRIPTION and PAGE_DESCRIPTION.strip() else None
-        )
+        self._PAGE_DESCRIPTION: Optional[str] = PAGE_DESCRIPTION.strip() if PAGE_DESCRIPTION and PAGE_DESCRIPTION.strip() else None
         self._PAGE_IMAGE: Optional[str] = PAGE_IMAGE.strip() if PAGE_IMAGE and PAGE_IMAGE.strip() else None
         self._PAGE_ICON: Optional[str] = PAGE_ICON.strip() if PAGE_ICON and PAGE_ICON.strip() else None
         self._SHARE_TITLE: Optional[str] = SHARE_TITLE.strip() if SHARE_TITLE and SHARE_TITLE.strip() else None
-        self._SHARE_DESCRIPTION: Optional[str] = (
-            SHARE_DESCRIPTION.strip() if SHARE_DESCRIPTION and SHARE_DESCRIPTION.strip() else None
-        )
+        self._SHARE_DESCRIPTION: Optional[str] = SHARE_DESCRIPTION.strip() if SHARE_DESCRIPTION and SHARE_DESCRIPTION.strip() else None
         self._SHARE_IMAGE: Optional[str] = SHARE_IMAGE.strip() if SHARE_IMAGE and SHARE_IMAGE.strip() else None
-        self._SHARE_TWITTER_TITLE: Optional[str] = (
-            SHARE_TWITTER_TITLE.strip() if SHARE_TWITTER_TITLE and SHARE_TWITTER_TITLE.strip() else None
-        )
-        self._SHARE_TWITTER_DESCRIPTION: Optional[str] = (
-            SHARE_TWITTER_DESCRIPTION.strip()
-            if SHARE_TWITTER_DESCRIPTION and SHARE_TWITTER_DESCRIPTION.strip()
-            else None
-        )
-        self._SHARE_TWITTER_IMAGE: Optional[str] = (
-            SHARE_TWITTER_IMAGE.strip() if SHARE_TWITTER_IMAGE and SHARE_TWITTER_IMAGE.strip() else None
-        )
+        self._SHARE_TWITTER_TITLE: Optional[str] = SHARE_TWITTER_TITLE.strip() if SHARE_TWITTER_TITLE and SHARE_TWITTER_TITLE.strip() else None
+        self._SHARE_TWITTER_DESCRIPTION: Optional[str] = SHARE_TWITTER_DESCRIPTION.strip() if SHARE_TWITTER_DESCRIPTION and SHARE_TWITTER_DESCRIPTION.strip() else None
+        self._SHARE_TWITTER_IMAGE: Optional[str] = SHARE_TWITTER_IMAGE.strip() if SHARE_TWITTER_IMAGE and SHARE_TWITTER_IMAGE.strip() else None
         self._OPTION_DISABLE_VIEWS: Optional[bool] = OPTION_DISABLE_VIEWS
         self._OPTION_DISABLE_SEARCH_ENGINE: Optional[bool] = OPTION_DISABLE_SEARCH_ENGINE
         self._OPTION_USE_ORIGINAL_PUB_DATE: Optional[bool] = OPTION_USE_ORIGINAL_PUB_DATE
-        self._ACCESS_RECOMMENDED_THEME: Optional[str] = (
-            ACCESS_RECOMMENDED_THEME.strip() if ACCESS_RECOMMENDED_THEME and ACCESS_RECOMMENDED_THEME.strip() else None
-        )
-        self._ACCESS_EASY_READ: Optional[str] = (
-            ("/" + ACCESS_EASY_READ.strip().split("/")[-1]) if ACCESS_EASY_READ and ACCESS_EASY_READ.strip() else None
-        )
+        self._ACCESS_RECOMMENDED_THEME: Optional[str] = ACCESS_RECOMMENDED_THEME.strip() if ACCESS_RECOMMENDED_THEME and ACCESS_RECOMMENDED_THEME.strip() else None
+        self._ACCESS_EASY_READ: Optional[str] = ("/" + ACCESS_EASY_READ.strip().split("/")[-1]) if ACCESS_EASY_READ and ACCESS_EASY_READ.strip() else None
         self._SECRET_VERIFY: Optional[str] = SECRET_VERIFY.strip() if SECRET_VERIFY and SECRET_VERIFY.strip() else None
-        self._SECRET_RAW_ACCESS_CODE: Optional[str] = (
-            SECRET_RAW_ACCESS_CODE.strip() if SECRET_RAW_ACCESS_CODE and SECRET_RAW_ACCESS_CODE.strip() else None
-        )
-        self._SECRET_EMAIL_ADDRESS: Optional[str] = (
-            SECRET_EMAIL_ADDRESS.strip() if SECRET_EMAIL_ADDRESS and SECRET_EMAIL_ADDRESS.strip() else None
-        )
-        self._CONTAINER_PADDING: Optional[list[str]] = (
-            [val.strip() for val in CONTAINER_PADDING if val.strip()] if CONTAINER_PADDING else None
-        )
-        self._CONTAINER_MAX_WIDTH: Optional[str] = (
-            CONTAINER_MAX_WIDTH.strip() if CONTAINER_MAX_WIDTH and CONTAINER_MAX_WIDTH.strip() else None
-        )
+        self._SECRET_RAW_ACCESS_CODE: Optional[str] = SECRET_RAW_ACCESS_CODE.strip() if SECRET_RAW_ACCESS_CODE and SECRET_RAW_ACCESS_CODE.strip() else None
+        self._SECRET_EMAIL_ADDRESS: Optional[str] = SECRET_EMAIL_ADDRESS.strip() if SECRET_EMAIL_ADDRESS and SECRET_EMAIL_ADDRESS.strip() else None
+        self._CONTAINER_PADDING: Optional[list[str]] = [val.strip() for val in CONTAINER_PADDING if val.strip()] if CONTAINER_PADDING else None
+        self._CONTAINER_MAX_WIDTH: Optional[str] = CONTAINER_MAX_WIDTH.strip() if CONTAINER_MAX_WIDTH and CONTAINER_MAX_WIDTH.strip() else None
         if CONTAINER_INNER_FOREGROUND_COLOR:
             for index, item in enumerate(CONTAINER_INNER_FOREGROUND_COLOR):
                 CONTAINER_INNER_FOREGROUND_COLOR[index] = item.replace(" ", "")
-        self._CONTAINER_INNER_FOREGROUND_COLOR: Optional[list[str]] = (
-            [val for val in CONTAINER_INNER_FOREGROUND_COLOR if val] if CONTAINER_INNER_FOREGROUND_COLOR else None
-        )
+        self._CONTAINER_INNER_FOREGROUND_COLOR: Optional[list[str]] = [val for val in CONTAINER_INNER_FOREGROUND_COLOR if val] if CONTAINER_INNER_FOREGROUND_COLOR else None
         if CONTAINER_INNER_BACKGROUND_COLOR:
             for index, item in enumerate(CONTAINER_INNER_BACKGROUND_COLOR):
                 CONTAINER_INNER_BACKGROUND_COLOR[index] = item.replace(" ", "")
-        self._CONTAINER_INNER_BACKGROUND_COLOR: Optional[list[str]] = (
-            [val for val in CONTAINER_INNER_BACKGROUND_COLOR if val] if CONTAINER_INNER_BACKGROUND_COLOR else None
-        )
+        self._CONTAINER_INNER_BACKGROUND_COLOR: Optional[list[str]] = [val for val in CONTAINER_INNER_BACKGROUND_COLOR if val] if CONTAINER_INNER_BACKGROUND_COLOR else None
         self._CONTAINER_INNER_BACKGROUND_IMAGE: Optional[str] = (
-            CONTAINER_INNER_BACKGROUND_IMAGE.strip()
-            if CONTAINER_INNER_BACKGROUND_IMAGE and CONTAINER_INNER_BACKGROUND_IMAGE.strip()
-            else None
+            CONTAINER_INNER_BACKGROUND_IMAGE.strip() if CONTAINER_INNER_BACKGROUND_IMAGE and CONTAINER_INNER_BACKGROUND_IMAGE.strip() else None
         )
-        self._CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT: Optional[
-            Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]
-        ] = CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT
-        self._CONTAINER_INNER_BACKGROUND_IMAGE_POSITION: Optional[
-            Literal["center", "left", "right", "top", "bottom"]
-        ] = CONTAINER_INNER_BACKGROUND_IMAGE_POSITION
-        self._CONTAINER_INNER_BACKGROUND_IMAGE_SIZE: Optional[Literal["contain", "cover"] | str] = (
-            CONTAINER_INNER_BACKGROUND_IMAGE_SIZE
-        )
+        self._CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]] = CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT
+        self._CONTAINER_INNER_BACKGROUND_IMAGE_POSITION: Optional[Literal["center", "left", "right", "top", "bottom"]] = CONTAINER_INNER_BACKGROUND_IMAGE_POSITION
+        self._CONTAINER_INNER_BACKGROUND_IMAGE_SIZE: Optional[Literal["contain", "cover"] | str] = CONTAINER_INNER_BACKGROUND_IMAGE_SIZE
         if CONTAINER_OUTER_FOREGROUND_COLOR:
             for index, item in enumerate(CONTAINER_OUTER_FOREGROUND_COLOR):
                 CONTAINER_OUTER_FOREGROUND_COLOR[index] = item.replace(" ", "")
-        self._CONTAINER_OUTER_FOREGROUND_COLOR: Optional[list[str]] = (
-            [val for val in CONTAINER_OUTER_FOREGROUND_COLOR if val] if CONTAINER_OUTER_FOREGROUND_COLOR else None
-        )
+        self._CONTAINER_OUTER_FOREGROUND_COLOR: Optional[list[str]] = [val for val in CONTAINER_OUTER_FOREGROUND_COLOR if val] if CONTAINER_OUTER_FOREGROUND_COLOR else None
         if CONTAINER_OUTER_BACKGROUND_COLOR:
             for index, item in enumerate(CONTAINER_OUTER_BACKGROUND_COLOR):
                 CONTAINER_OUTER_BACKGROUND_COLOR[index] = item.replace(" ", "")
-        self._CONTAINER_OUTER_BACKGROUND_COLOR: Optional[list[str]] = (
-            [val for val in CONTAINER_OUTER_BACKGROUND_COLOR if val] if CONTAINER_OUTER_BACKGROUND_COLOR else None
-        )
+        self._CONTAINER_OUTER_BACKGROUND_COLOR: Optional[list[str]] = [val for val in CONTAINER_OUTER_BACKGROUND_COLOR if val] if CONTAINER_OUTER_BACKGROUND_COLOR else None
         self._CONTAINER_OUTER_BACKGROUND_IMAGE: Optional[str] = (
-            CONTAINER_OUTER_BACKGROUND_IMAGE.strip()
-            if CONTAINER_OUTER_BACKGROUND_IMAGE and CONTAINER_OUTER_BACKGROUND_IMAGE.strip()
-            else None
+            CONTAINER_OUTER_BACKGROUND_IMAGE.strip() if CONTAINER_OUTER_BACKGROUND_IMAGE and CONTAINER_OUTER_BACKGROUND_IMAGE.strip() else None
         )
-        self._CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT: Optional[
-            Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]
-        ] = CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT
-        self._CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION: Optional[
-            Literal["center", "left", "right", "top", "bottom"]
-        ] = CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION
+        self._CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]] = CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT
+        self._CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION: Optional[Literal["center", "left", "right", "top", "bottom"]] = CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION
         self._CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE: Optional[str] = (
-            CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE.strip()
-            if CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE and CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE.strip()
-            else None
+            CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE.strip() if CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE and CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE.strip() else None
         )
-        self._CONTAINER_BORDER_IMAGE: Optional[str] = (
-            CONTAINER_BORDER_IMAGE.strip() if CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE.strip() else None
-        )
-        self._CONTAINER_BORDER_IMAGE_SLICE: Optional[list[str]] = (
-            [val.strip() for val in CONTAINER_BORDER_IMAGE_SLICE if val.strip()]
-            if CONTAINER_BORDER_IMAGE_SLICE
-            else None
-        )
-        self._CONTAINER_BORDER_IMAGE_WIDTH: Optional[list[str]] = (
-            [val.strip() for val in CONTAINER_BORDER_IMAGE_WIDTH if val.strip()]
-            if CONTAINER_BORDER_IMAGE_WIDTH
-            else None
-        )
-        self._CONTAINER_BORDER_IMAGE_OUTSET: Optional[list[str]] = (
-            [val.strip() for val in CONTAINER_BORDER_IMAGE_OUTSET if val.strip()]
-            if CONTAINER_BORDER_IMAGE_OUTSET
-            else None
-        )
-        self._CONTAINER_BORDER_IMAGE_REPEAT: Optional[list[str]] = (
-            [val.strip() for val in CONTAINER_BORDER_IMAGE_REPEAT if val.strip()]
-            if CONTAINER_BORDER_IMAGE_REPEAT
-            else None
-        )
+        self._CONTAINER_BORDER_IMAGE: Optional[str] = CONTAINER_BORDER_IMAGE.strip() if CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE.strip() else None
+        self._CONTAINER_BORDER_IMAGE_SLICE: Optional[list[str]] = [val.strip() for val in CONTAINER_BORDER_IMAGE_SLICE if val.strip()] if CONTAINER_BORDER_IMAGE_SLICE else None
+        self._CONTAINER_BORDER_IMAGE_WIDTH: Optional[list[str]] = [val.strip() for val in CONTAINER_BORDER_IMAGE_WIDTH if val.strip()] if CONTAINER_BORDER_IMAGE_WIDTH else None
+        self._CONTAINER_BORDER_IMAGE_OUTSET: Optional[list[str]] = [val.strip() for val in CONTAINER_BORDER_IMAGE_OUTSET if val.strip()] if CONTAINER_BORDER_IMAGE_OUTSET else None
+        self._CONTAINER_BORDER_IMAGE_REPEAT: Optional[list[str]] = [val.strip() for val in CONTAINER_BORDER_IMAGE_REPEAT if val.strip()] if CONTAINER_BORDER_IMAGE_REPEAT else None
         if CONTAINER_BORDER_COLOR:
             for index, item in enumerate(CONTAINER_BORDER_COLOR):
                 CONTAINER_BORDER_COLOR[index] = item.replace(" ", "")
-        self._CONTAINER_BORDER_COLOR: Optional[list[str]] = (
-            [val for val in CONTAINER_BORDER_COLOR if val] if CONTAINER_BORDER_COLOR else None
+        self._CONTAINER_BORDER_COLOR: Optional[list[str]] = [val for val in CONTAINER_BORDER_COLOR if val] if CONTAINER_BORDER_COLOR else None
+        self._CONTAINER_BORDER_WIDTH: Optional[list[str]] = [val.strip() for val in CONTAINER_BORDER_WIDTH if val.strip()] if CONTAINER_BORDER_WIDTH else None
+        self._CONTAINER_BORDER_STYLE: Optional[list[Literal["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]]] = CONTAINER_BORDER_STYLE
+        self._CONTAINER_BORDER_RADIUS: Optional[list[str]] = [val.strip() for val in CONTAINER_BORDER_RADIUS if val.strip()] if CONTAINER_BORDER_RADIUS else None
+        self._CONTAINER_SHADOW_COLOR: Optional[str] = CONTAINER_SHADOW_COLOR.replace(" ", "") if CONTAINER_SHADOW_COLOR and CONTAINER_SHADOW_COLOR.replace(" ", "") else None
+        self._CONTAINER_SHADOW_OFFSET: Optional[list[str]] = [val.strip() for val in CONTAINER_SHADOW_OFFSET if val.strip()] if CONTAINER_SHADOW_OFFSET else None
+        self._CONTAINER_SHADOW_SPREAD: Optional[str] = CONTAINER_SHADOW_SPREAD.strip() if CONTAINER_SHADOW_SPREAD and CONTAINER_SHADOW_SPREAD.strip() else None
+        self._CONTAINER_SHADOW_BLUR: Optional[str] = CONTAINER_SHADOW_BLUR.strip() if CONTAINER_SHADOW_BLUR and CONTAINER_SHADOW_BLUR.strip() else None
+        self._CONTENT_FONT: Optional[list[str]] = [val.strip() for val in CONTENT_FONT if val.strip()] if CONTENT_FONT else None
+        self._CONTENT_FONT_WEIGHT: Optional[list[Literal["bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"]]] = (
+            CONTENT_FONT_WEIGHT
         )
-        self._CONTAINER_BORDER_WIDTH: Optional[list[str]] = (
-            [val.strip() for val in CONTAINER_BORDER_WIDTH if val.strip()] if CONTAINER_BORDER_WIDTH else None
-        )
-        self._CONTAINER_BORDER_STYLE: Optional[
-            list[Literal["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]]
-        ] = CONTAINER_BORDER_STYLE
-        self._CONTAINER_BORDER_RADIUS: Optional[list[str]] = (
-            [val.strip() for val in CONTAINER_BORDER_RADIUS if val.strip()] if CONTAINER_BORDER_RADIUS else None
-        )
-        self._CONTAINER_SHADOW_COLOR: Optional[str] = (
-            CONTAINER_SHADOW_COLOR.replace(" ", "")
-            if CONTAINER_SHADOW_COLOR and CONTAINER_SHADOW_COLOR.replace(" ", "")
-            else None
-        )
-        self._CONTAINER_SHADOW_OFFSET: Optional[list[str]] = (
-            [val.strip() for val in CONTAINER_SHADOW_OFFSET if val.strip()] if CONTAINER_SHADOW_OFFSET else None
-        )
-        self._CONTAINER_SHADOW_SPREAD: Optional[str] = (
-            CONTAINER_SHADOW_SPREAD.strip() if CONTAINER_SHADOW_SPREAD and CONTAINER_SHADOW_SPREAD.strip() else None
-        )
-        self._CONTAINER_SHADOW_BLUR: Optional[str] = (
-            CONTAINER_SHADOW_BLUR.strip() if CONTAINER_SHADOW_BLUR and CONTAINER_SHADOW_BLUR.strip() else None
-        )
-        self._CONTENT_FONT: Optional[list[str]] = (
-            [val.strip() for val in CONTENT_FONT if val.strip()] if CONTENT_FONT else None
-        )
-        self._CONTENT_FONT_WEIGHT: Optional[
-            list[
-                Literal[
-                    "bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"
-                ]
-            ]
-        ] = CONTENT_FONT_WEIGHT
         self._CONTENT_TEXT_DIRECTION: Optional[Literal["ltr", "rtl"]] = CONTENT_TEXT_DIRECTION
-        self._CONTENT_TEXT_SIZE: Optional[list[str]] = (
-            [val.strip() for val in CONTENT_TEXT_SIZE if val.strip()] if CONTENT_TEXT_SIZE else None
-        )
+        self._CONTENT_TEXT_SIZE: Optional[list[str]] = [val.strip() for val in CONTENT_TEXT_SIZE if val.strip()] if CONTENT_TEXT_SIZE else None
         self._CONTENT_TEXT_ALIGN: Optional[Literal["right", "center", "justify"]] = CONTENT_TEXT_ALIGN
         self._CONTENT_TEXT_SHADOW_COLOR: Optional[str] = (
-            CONTENT_TEXT_SHADOW_COLOR.replace(" ", "")
-            if CONTENT_TEXT_SHADOW_COLOR and CONTENT_TEXT_SHADOW_COLOR.replace(" ", "")
-            else None
+            CONTENT_TEXT_SHADOW_COLOR.replace(" ", "") if CONTENT_TEXT_SHADOW_COLOR and CONTENT_TEXT_SHADOW_COLOR.replace(" ", "") else None
         )
-        self._CONTENT_TEXT_SHADOW_OFFSET: Optional[list[str]] = (
-            [val.strip() for val in CONTENT_TEXT_SHADOW_OFFSET if val.strip()] if CONTENT_TEXT_SHADOW_OFFSET else None
-        )
-        self._CONTENT_TEXT_SHADOW_BLUR: Optional[str] = (
-            CONTENT_TEXT_SHADOW_BLUR.strip() if CONTENT_TEXT_SHADOW_BLUR and CONTENT_TEXT_SHADOW_BLUR.strip() else None
-        )
+        self._CONTENT_TEXT_SHADOW_OFFSET: Optional[list[str]] = [val.strip() for val in CONTENT_TEXT_SHADOW_OFFSET if val.strip()] if CONTENT_TEXT_SHADOW_OFFSET else None
+        self._CONTENT_TEXT_SHADOW_BLUR: Optional[str] = CONTENT_TEXT_SHADOW_BLUR.strip() if CONTENT_TEXT_SHADOW_BLUR and CONTENT_TEXT_SHADOW_BLUR.strip() else None
         if CONTENT_TEXT_COLOR:
             for index, item in enumerate(CONTENT_TEXT_COLOR):
                 CONTENT_TEXT_COLOR[index] = item.replace(" ", "")
-        self._CONTENT_TEXT_COLOR: Optional[list[str]] = (
-            [val for val in CONTENT_TEXT_COLOR if val] if CONTENT_TEXT_COLOR else None
-        )
+        self._CONTENT_TEXT_COLOR: Optional[list[str]] = [val for val in CONTENT_TEXT_COLOR if val] if CONTENT_TEXT_COLOR else None
         if CONTENT_LINK_COLOR:
             for index, item in enumerate(CONTENT_LINK_COLOR):
                 CONTENT_LINK_COLOR[index] = item.replace(" ", "")
-        self._CONTENT_LINK_COLOR: Optional[list[str]] = (
-            [val for val in CONTENT_LINK_COLOR if val] if CONTENT_LINK_COLOR else None
-        )
+        self._CONTENT_LINK_COLOR: Optional[list[str]] = [val for val in CONTENT_LINK_COLOR if val] if CONTENT_LINK_COLOR else None
         if CONTENT_BULLET_COLOR:
             for index, item in enumerate(CONTENT_BULLET_COLOR):
                 CONTENT_BULLET_COLOR[index] = item.replace(" ", "")
-        self._CONTENT_BULLET_COLOR: Optional[list[str]] = (
-            [val for val in CONTENT_BULLET_COLOR if val] if CONTENT_BULLET_COLOR else None
-        )
+        self._CONTENT_BULLET_COLOR: Optional[list[str]] = [val for val in CONTENT_BULLET_COLOR if val] if CONTENT_BULLET_COLOR else None
         self._CONTENT_LINK_BEHAVIOR: Optional[list[Literal["same", "new"]]] = CONTENT_LINK_BEHAVIOR
+        self._SAFETY_PAGE_WARNING: Optional[list[Literal["adult", "sensitive", "epilepsy", "custom"]]] = SAFETY_PAGE_WARNING
+        self._SAFETY_PAGE_WARNING_DESCRIPTION: Optional[str] = SAFETY_PAGE_WARNING_DESCRIPTION.strip() if SAFETY_PAGE_WARNING_DESCRIPTION and SAFETY_PAGE_WARNING_DESCRIPTION.strip() else None
+        self._SAFETY_MEDIA_BLUR: Optional[bool] = SAFETY_MEDIA_BLUR
+        self._SAFETY_LINK_WARNING: Optional[list[Literal["adult", "epilepsy", "sensitive"]]] = SAFETY_LINK_WARNING
+        self._SAFETY_LINK_WARNING_DESCRIPTION: Optional[str] = SAFETY_LINK_WARNING_DESCRIPTION.strip() if SAFETY_LINK_WARNING_DESCRIPTION and SAFETY_LINK_WARNING_DESCRIPTION.strip() else None
+        self._SAFETY_PAGE_FLAG: Optional[list[Literal["adult", "epilepsy", "sensitive"]]] = SAFETY_PAGE_FLAG
 
         self.validate()
 
@@ -870,9 +785,7 @@ class RentryPageMetadata:
 
     @CONTAINER_INNER_FOREGROUND_COLOR.setter
     def CONTAINER_INNER_FOREGROUND_COLOR(self, value: Optional[list[str]]) -> None:
-        self._CONTAINER_INNER_FOREGROUND_COLOR = (
-            [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
-        )
+        self._CONTAINER_INNER_FOREGROUND_COLOR = [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
         self.validate()
 
     @property
@@ -882,9 +795,7 @@ class RentryPageMetadata:
 
     @CONTAINER_INNER_BACKGROUND_COLOR.setter
     def CONTAINER_INNER_BACKGROUND_COLOR(self, value: Optional[list[str]]) -> None:
-        self._CONTAINER_INNER_BACKGROUND_COLOR = (
-            [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
-        )
+        self._CONTAINER_INNER_BACKGROUND_COLOR = [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
         self.validate()
 
     @property
@@ -905,9 +816,7 @@ class RentryPageMetadata:
         return self._CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT
 
     @CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT.setter
-    def CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT(
-        self, value: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]]
-    ) -> None:
+    def CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT(self, value: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]]) -> None:
         self._CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT = value
         self.validate()
 
@@ -919,9 +828,7 @@ class RentryPageMetadata:
         return self._CONTAINER_INNER_BACKGROUND_IMAGE_POSITION
 
     @CONTAINER_INNER_BACKGROUND_IMAGE_POSITION.setter
-    def CONTAINER_INNER_BACKGROUND_IMAGE_POSITION(
-        self, value: Optional[Literal["center", "left", "right", "top", "bottom"]]
-    ) -> None:
+    def CONTAINER_INNER_BACKGROUND_IMAGE_POSITION(self, value: Optional[Literal["center", "left", "right", "top", "bottom"]]) -> None:
         self._CONTAINER_INNER_BACKGROUND_IMAGE_POSITION = value
         self.validate()
 
@@ -942,9 +849,7 @@ class RentryPageMetadata:
 
     @CONTAINER_OUTER_FOREGROUND_COLOR.setter
     def CONTAINER_OUTER_FOREGROUND_COLOR(self, value: Optional[list[str]]) -> None:
-        self._CONTAINER_OUTER_FOREGROUND_COLOR = (
-            [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
-        )
+        self._CONTAINER_OUTER_FOREGROUND_COLOR = [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
         self.validate()
 
     @property
@@ -954,9 +859,7 @@ class RentryPageMetadata:
 
     @CONTAINER_OUTER_BACKGROUND_COLOR.setter
     def CONTAINER_OUTER_BACKGROUND_COLOR(self, value: Optional[list[str]]) -> None:
-        self._CONTAINER_OUTER_BACKGROUND_COLOR = (
-            [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
-        )
+        self._CONTAINER_OUTER_BACKGROUND_COLOR = [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
         self.validate()
 
     @property
@@ -977,9 +880,7 @@ class RentryPageMetadata:
         return self._CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT
 
     @CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT.setter
-    def CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT(
-        self, value: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]]
-    ) -> None:
+    def CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT(self, value: Optional[Literal["no-repeat", "repeat-x", "repeat-y", "round", "space"]]) -> None:
         self._CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT = value
         self.validate()
 
@@ -991,9 +892,7 @@ class RentryPageMetadata:
         return self._CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION
 
     @CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION.setter
-    def CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION(
-        self, value: Optional[Literal["center", "left", "right", "top", "bottom"]]
-    ) -> None:
+    def CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION(self, value: Optional[Literal["center", "left", "right", "top", "bottom"]]) -> None:
         self._CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION = value
         self.validate()
 
@@ -1064,9 +963,7 @@ class RentryPageMetadata:
 
     @CONTAINER_BORDER_COLOR.setter
     def CONTAINER_BORDER_COLOR(self, value: Optional[list[str]]) -> None:
-        self._CONTAINER_BORDER_COLOR = (
-            [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
-        )
+        self._CONTAINER_BORDER_COLOR = [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
         self.validate()
 
     @property
@@ -1157,26 +1054,14 @@ class RentryPageMetadata:
     @property
     def CONTENT_FONT_WEIGHT(
         self,
-    ) -> Optional[
-        list[
-            Literal[
-                "bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"
-            ]
-        ]
-    ]:
+    ) -> Optional[list[Literal["bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"]]]:
         """The boldness of the content font."""
         return self._CONTENT_FONT_WEIGHT
 
     @CONTENT_FONT_WEIGHT.setter
     def CONTENT_FONT_WEIGHT(
         self,
-        value: Optional[
-            list[
-                Literal[
-                    "bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"
-                ]
-            ]
-        ],
+        value: Optional[list[Literal["bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", "900"]]],
     ) -> None:
         self._CONTENT_FONT_WEIGHT = value
         self.validate()
@@ -1268,9 +1153,7 @@ class RentryPageMetadata:
 
     @CONTENT_BULLET_COLOR.setter
     def CONTENT_BULLET_COLOR(self, value: Optional[list[str]]) -> None:
-        self._CONTENT_BULLET_COLOR = (
-            [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
-        )
+        self._CONTENT_BULLET_COLOR = [stripped for val in value if (stripped := val.replace(" ", ""))] if value else None
         self.validate()
 
     @property
@@ -1281,6 +1164,66 @@ class RentryPageMetadata:
     @CONTENT_LINK_BEHAVIOR.setter
     def CONTENT_LINK_BEHAVIOR(self, value: Optional[list[Literal["same", "new"]]]) -> None:
         self._CONTENT_LINK_BEHAVIOR = value
+        self.validate()
+
+    @property
+    def SAFETY_PAGE_WARNING(self) -> Optional[list[Literal["adult", "sensitive", "epilepsy", "custom"]]]:
+        """Adds a warning popup to your page before allowing visitors to view."""
+        return self._SAFETY_PAGE_WARNING
+
+    @SAFETY_PAGE_WARNING.setter
+    def SAFETY_PAGE_WARNING(self, value: Optional[list[Literal["adult", "sensitive", "epilepsy", "custom"]]]) -> None:
+        self._SAFETY_PAGE_WARNING = value
+        self.validate()
+
+    @property
+    def SAFETY_PAGE_WARNING_DESCRIPTION(self) -> Optional[str]:
+        """Provide your own text to the warning popup created by SAFETY_PAGE_WARNING."""
+        return self._SAFETY_PAGE_WARNING_DESCRIPTION
+
+    @SAFETY_PAGE_WARNING_DESCRIPTION.setter
+    def SAFETY_PAGE_WARNING_DESCRIPTION(self, value: Optional[str]) -> None:
+        self._SAFETY_PAGE_WARNING_DESCRIPTION = value.strip() if value and value.strip() else None
+        self.validate()
+
+    @property
+    def SAFETY_MEDIA_BLUR(self) -> Optional[bool]:
+        """Blurs all images in your page and requires them to be clicked before showing."""
+        return self._SAFETY_MEDIA_BLUR
+
+    @SAFETY_MEDIA_BLUR.setter
+    def SAFETY_MEDIA_BLUR(self, value: Optional[bool]) -> None:
+        self._SAFETY_MEDIA_BLUR = value
+        self.validate()
+
+    @property
+    def SAFETY_LINK_WARNING(self) -> Optional[list[Literal["adult", "epilepsy", "sensitive"]]]:
+        """Triggers a popup when clicking on a link within your content."""
+        return self._SAFETY_LINK_WARNING
+
+    @SAFETY_LINK_WARNING.setter
+    def SAFETY_LINK_WARNING(self, value: Optional[list[Literal["adult", "epilepsy", "sensitive"]]]) -> None:
+        self._SAFETY_LINK_WARNING = value
+        self.validate()
+
+    @property
+    def SAFETY_LINK_WARNING_DESCRIPTION(self) -> Optional[str]:
+        """Provide your own text to the link warning popup."""
+        return self._SAFETY_LINK_WARNING_DESCRIPTION
+
+    @SAFETY_LINK_WARNING_DESCRIPTION.setter
+    def SAFETY_LINK_WARNING_DESCRIPTION(self, value: Optional[str]) -> None:
+        self._SAFETY_LINK_WARNING_DESCRIPTION = value.strip() if value and value.strip() else None
+        self.validate()
+
+    @property
+    def SAFETY_PAGE_FLAG(self) -> Optional[list[Literal["adult", "epilepsy", "sensitive"]]]:
+        """Creates a visual icon on your page to inform readers that a page contains certain material."""
+        return self._SAFETY_PAGE_FLAG
+
+    @SAFETY_PAGE_FLAG.setter
+    def SAFETY_PAGE_FLAG(self, value: Optional[list[Literal["adult", "epilepsy", "sensitive"]]]) -> None:
+        self._SAFETY_PAGE_FLAG = value
         self.validate()
 
     def _check_css_size(
@@ -1316,9 +1259,7 @@ class RentryPageMetadata:
                 if not allowed_terms:
                     errors.append(f"{rule} must be a valid CSS size.")
                 elif value not in allowed_terms:
-                    errors.append(
-                        f"{rule} must be a valid CSS size or one of the following: {', '.join(allowed_terms)}."
-                    )
+                    errors.append(f"{rule} must be a valid CSS size or one of the following: {', '.join(allowed_terms)}.")
                 continue
 
             number_str: str = match.group(1)
@@ -1329,9 +1270,7 @@ class RentryPageMetadata:
                 if not unitless_bounds:
                     errors.append(f"{rule} values must have units.")
                 elif not unitless_bounds[0] <= number <= unitless_bounds[1]:
-                    errors.append(
-                        f"{rule} unitless values must be between {unitless_bounds[0]} and {unitless_bounds[1]}."
-                    )
+                    errors.append(f"{rule} unitless values must be between {unitless_bounds[0]} and {unitless_bounds[1]}.")
             elif unit == "px":
                 if not px_bounds:
                     errors.append(f"{rule} values do not support px units.")
@@ -1378,10 +1317,7 @@ class RentryPageMetadata:
         if len(" ".join(values)) > max_length:
             errors.append(f"{rule} must have a total length of {max_length} characters or less.")
 
-        if any(
-            not HEX_REGEX.match(value) and not RGBA_REGEX.match(value) and value not in CSS_COLOR_NAMES
-            for value in values
-        ):
+        if any(not HEX_REGEX.match(value) and not RGBA_REGEX.match(value) and value not in CSS_COLOR_NAMES for value in values):
             errors.append(f"{rule} values must be valid HEX codes, RGBA values, or CSS color names.")
 
         return errors
@@ -1445,6 +1381,12 @@ class RentryPageMetadata:
             "CONTENT_LINK_COLOR": "list",
             "CONTENT_BULLET_COLOR": "list",
             "CONTENT_LINK_BEHAVIOR": "list",
+            "SAFETY_PAGE_WARNING": "list",
+            "SAFETY_PAGE_WARNING_DESCRIPTION": "str",
+            "SAFETY_MEDIA_BLUR": "bool",
+            "SAFETY_LINK_WARNING": "list",
+            "SAFETY_LINK_WARNING_DESCRIPTION": "str",
+            "SAFETY_PAGE_FLAG": "list",
         }
 
         return type_mapping.get(variable, "UNKNOWN")
@@ -1600,17 +1542,13 @@ class RentryPageMetadata:
             valid_repeats = ["no-repeat", "repeat-x", "repeat-y", "round", "space"]
 
             if self._CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT not in valid_repeats:
-                errors.append(
-                    'CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT must be "no-repeat", "repeat-x", "repeat-y", "round", or "space".'
-                )
+                errors.append('CONTAINER_INNER_BACKGROUND_IMAGE_REPEAT must be "no-repeat", "repeat-x", "repeat-y", "round", or "space".')
 
         if self._CONTAINER_INNER_BACKGROUND_IMAGE_POSITION:
             valid_positions = ["center", "left", "right", "top", "bottom"]
 
             if self._CONTAINER_INNER_BACKGROUND_IMAGE_POSITION not in valid_positions:
-                errors.append(
-                    'CONTAINER_INNER_BACKGROUND_IMAGE_POSITION must be "center", "left", "right", "top", or "bottom".'
-                )
+                errors.append('CONTAINER_INNER_BACKGROUND_IMAGE_POSITION must be "center", "left", "right", "top", or "bottom".')
 
         if self._CONTAINER_INNER_BACKGROUND_IMAGE_SIZE:
             errors.extend(
@@ -1660,17 +1598,13 @@ class RentryPageMetadata:
             valid_repeats = ["no-repeat", "repeat-x", "repeat-y", "round", "space"]
 
             if self._CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT not in valid_repeats:
-                errors.append(
-                    'CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT must be "no-repeat", "repeat-x", "repeat-y", "round", or "space".'
-                )
+                errors.append('CONTAINER_OUTER_BACKGROUND_IMAGE_REPEAT must be "no-repeat", "repeat-x", "repeat-y", "round", or "space".')
 
         if self._CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION:
             valid_positions = ["center", "left", "right", "top", "bottom"]
 
             if self._CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION not in valid_positions:
-                errors.append(
-                    'CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION must be "center", "left", "right", "top", or "bottom".'
-                )
+                errors.append('CONTAINER_OUTER_BACKGROUND_IMAGE_POSITION must be "center", "left", "right", "top", or "bottom".')
 
         if self._CONTAINER_OUTER_BACKGROUND_IMAGE_SIZE:
             errors.extend(
@@ -1698,9 +1632,7 @@ class RentryPageMetadata:
 
         if self._CONTAINER_BORDER_IMAGE_SLICE:
             if not self._CONTAINER_BORDER_IMAGE or not self._CONTAINER_BORDER_IMAGE_WIDTH:
-                errors.append(
-                    "CONTAINER_BORDER_IMAGE_SLICE requires CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE_WIDTH."
-                )
+                errors.append("CONTAINER_BORDER_IMAGE_SLICE requires CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE_WIDTH.")
 
             errors.extend(
                 self._check_css_size(
@@ -1740,9 +1672,7 @@ class RentryPageMetadata:
 
         if self._CONTAINER_BORDER_IMAGE_OUTSET:
             if not self._CONTAINER_BORDER_IMAGE or not self._CONTAINER_BORDER_IMAGE_WIDTH:
-                errors.append(
-                    "CONTAINER_BORDER_IMAGE_OUTSET requires CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE_WIDTH."
-                )
+                errors.append("CONTAINER_BORDER_IMAGE_OUTSET requires CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE_WIDTH.")
 
             errors.extend(
                 self._check_css_size(
@@ -1762,9 +1692,7 @@ class RentryPageMetadata:
 
         if self._CONTAINER_BORDER_IMAGE_REPEAT:
             if not self._CONTAINER_BORDER_IMAGE or not self._CONTAINER_BORDER_IMAGE_WIDTH:
-                errors.append(
-                    "CONTAINER_BORDER_IMAGE_REPEAT requires CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE_WIDTH."
-                )
+                errors.append("CONTAINER_BORDER_IMAGE_REPEAT requires CONTAINER_BORDER_IMAGE and CONTAINER_BORDER_IMAGE_WIDTH.")
 
             errors.extend(
                 self._check_css_size(
@@ -1806,12 +1734,12 @@ class RentryPageMetadata:
                     max_values=4,
                     max_length=64,
                     allowed_terms=[],
-                    unitless_bounds=(0, 30, 0),
-                    px_bounds=(0, 30, 0),
-                    percent_bounds=(0, 100, 3),
-                    vh_bounds=(0, 100, 4),
-                    hw_bounds=(0, 100, 4),
-                    rem_bounds=(0, 10, 4),
+                    unitless_bounds=(0, 40, 0),
+                    px_bounds=(0, 40, 0),
+                    percent_bounds=(0, 15, 3),
+                    vh_bounds=(0, 5, 4),
+                    hw_bounds=(0, 5, 4),
+                    rem_bounds=(0, 4, 4),
                 )
             )
 
@@ -1822,9 +1750,7 @@ class RentryPageMetadata:
             valid_styles = ["dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset"]
 
             if any(style not in valid_styles for style in self._CONTAINER_BORDER_STYLE):
-                errors.append(
-                    'CONTAINER_BORDER_STYLE must be "dotted", "dashed", "solid", "double", "groove", "ridge", "inset", or "outset".'
-                )
+                errors.append('CONTAINER_BORDER_STYLE must be "dotted", "dashed", "solid", "double", "groove", "ridge", "inset", or "outset".')
 
         if self._CONTAINER_BORDER_RADIUS:
             errors.extend(
@@ -1844,20 +1770,10 @@ class RentryPageMetadata:
             )
 
         if self._CONTAINER_SHADOW_COLOR:
-            if (
-                not self._CONTAINER_SHADOW_OFFSET
-                and not self._CONTAINER_SHADOW_SPREAD
-                and not self._CONTAINER_SHADOW_BLUR
-            ):
-                errors.append(
-                    "CONTAINER_SHADOW_COLOR requires CONTAINER_SHADOW_OFFSET, CONTAINER_SHADOW_SPREAD, or CONTAINER_SHADOW_BLUR."
-                )
+            if not self._CONTAINER_SHADOW_OFFSET and not self._CONTAINER_SHADOW_SPREAD and not self._CONTAINER_SHADOW_BLUR:
+                errors.append("CONTAINER_SHADOW_COLOR requires CONTAINER_SHADOW_OFFSET, CONTAINER_SHADOW_SPREAD, or CONTAINER_SHADOW_BLUR.")
 
-            errors.extend(
-                self._check_css_color(
-                    rule="CONTAINER_SHADOW_COLOR", values=self._CONTAINER_SHADOW_COLOR, max_values=1, max_length=32
-                )
-            )
+            errors.extend(self._check_css_color(rule="CONTAINER_SHADOW_COLOR", values=self._CONTAINER_SHADOW_COLOR, max_values=1, max_length=32))
 
         if self._CONTAINER_SHADOW_OFFSET:
             if not self._CONTAINER_SHADOW_COLOR:
@@ -1950,9 +1866,7 @@ class RentryPageMetadata:
             ]
 
             if any(weight not in valid_weights for weight in self._CONTENT_FONT_WEIGHT):
-                errors.append(
-                    'CONTENT_FONT_WEIGHT must be "bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", or "900".'
-                )
+                errors.append('CONTENT_FONT_WEIGHT must be "bold", "bolder", "lighter", "normal", "100", "200", "300", "400", "500", "600", "700", "800", or "900".')
 
         if self._CONTENT_TEXT_DIRECTION and self._CONTENT_TEXT_DIRECTION not in ["ltr", "rtl"]:
             errors.append('CONTENT_TEXT_DIRECTION must be "ltr" or "rtl".')
@@ -1965,7 +1879,7 @@ class RentryPageMetadata:
                     max_values=12,
                     max_length=128,
                     allowed_terms=[],
-                    unitless_bounds=(0, 0, 0),
+                    unitless_bounds=(8, 64, 0),
                     px_bounds=(8, 64, 0),
                     percent_bounds=(10, 500, 3),
                     vh_bounds=(2, 10, 4),
@@ -2012,9 +1926,7 @@ class RentryPageMetadata:
 
         if self._CONTENT_TEXT_SHADOW_BLUR:
             if not self._CONTENT_TEXT_SHADOW_COLOR or not self._CONTENT_TEXT_SHADOW_OFFSET:
-                errors.append(
-                    "CONTENT_TEXT_SHADOW_BLUR requires CONTENT_TEXT_SHADOW_COLOR and CONTENT_TEXT_SHADOW_OFFSET."
-                )
+                errors.append("CONTENT_TEXT_SHADOW_BLUR requires CONTENT_TEXT_SHADOW_COLOR and CONTENT_TEXT_SHADOW_OFFSET.")
 
             errors.extend(
                 self._check_css_size(
@@ -2069,6 +1981,42 @@ class RentryPageMetadata:
             if any(behavior not in ["same", "new"] for behavior in self._CONTENT_LINK_BEHAVIOR):
                 errors.append('CONTENT_LINK_BEHAVIOR must be "same" or "new".')
 
+        if self._SAFETY_PAGE_WARNING:
+            if len(self._SAFETY_PAGE_WARNING) > 4:
+                errors.append("SAFETY_PAGE_WARNING must have 4 values or less.")
+
+            if len(" ".join(self._SAFETY_PAGE_WARNING)) > 100:
+                errors.append("SAFETY_PAGE_WARNING must be 100 characters or less.")
+
+            if any(warning not in ["adult", "sensitive", "epilepsy", "custom"] for warning in self._SAFETY_PAGE_WARNING):
+                errors.append('SAFETY_PAGE_WARNING must be "adult", "sensitive", "epilepsy", or "custom".')
+
+        if self._SAFETY_PAGE_WARNING_DESCRIPTION and len(self._SAFETY_PAGE_WARNING_DESCRIPTION) > 240:
+            errors.append("SAFETY_PAGE_WARNING_DESCRIPTION must be 240 characters or less.")
+
+        if self._SAFETY_LINK_WARNING:
+            if len(self._SAFETY_LINK_WARNING) > 3:
+                errors.append("SAFETY_LINK_WARNING must have 3 values or less.")
+
+            if len(" ".join(self._SAFETY_LINK_WARNING)) > 100:
+                errors.append("SAFETY_LINK_WARNING must be 100 characters or less.")
+
+            if any(warning not in ["adult", "epilepsy", "sensitive"] for warning in self._SAFETY_LINK_WARNING):
+                errors.append('SAFETY_LINK_WARNING must be "adult", "epilepsy", or "sensitive".')
+
+        if self._SAFETY_LINK_WARNING_DESCRIPTION and len(self._SAFETY_LINK_WARNING_DESCRIPTION) > 240:
+            errors.append("SAFETY_LINK_WARNING_DESCRIPTION must be 240 characters or less.")
+
+        if self._SAFETY_PAGE_FLAG:
+            if len(self._SAFETY_PAGE_FLAG) > 3:
+                errors.append("SAFETY_PAGE_FLAG must have 3 values or less.")
+
+            if len(" ".join(self._SAFETY_PAGE_FLAG)) > 100:
+                errors.append("SAFETY_PAGE_FLAG must be 100 characters or less.")
+
+            if any(flag not in ["adult", "epilepsy", "sensitive"] for flag in self._SAFETY_PAGE_FLAG):
+                errors.append('SAFETY_PAGE_FLAG must be "adult", "epilepsy", or "sensitive".')
+
         if errors:
             raise RentryInvalidMetadataError("\n".join(errors))
 
@@ -2086,9 +2034,7 @@ class RentryPageMetadata:
 
             return val
 
-        return json.dumps(
-            {key.removeprefix("_"): encode_value(val) for key, val in self.__dict__.items() if val is not None}
-        )
+        return json.dumps({key.removeprefix("_"): encode_value(val) for key, val in self.__dict__.items() if val is not None})
 
     def decode(self, data: str | dict[str, Any]) -> None:
         """

@@ -5,12 +5,8 @@ USER_AGENT = "rentry.py/0.2.9 (PyPI)"
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 SECRET_REGEX = re.compile(r"\|\|\s([a-f0-9]{32})\s\|\|\s(\d{1,2}\s[A-Za-z]{3}\s\d{4})\s\|\|")
 
-ANY_URL_REGEX = re.compile(
-    r"^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b[-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*$"
-)
-RENTRY_PAGE_URL_REGEX = re.compile(
-    r"^(?:https:\/\/(www\.)?rentry\.(?:co|org))?\/?([a-zA-Z0-9_-]{2,100})$", re.IGNORECASE
-)
+ANY_URL_REGEX = re.compile(r"^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b[-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*$")
+RENTRY_PAGE_URL_REGEX = re.compile(r"^(?:https:\/\/(www\.)?rentry\.(?:co|org))?\/?([a-zA-Z0-9_-]{2,100})$", re.IGNORECASE)
 
 CSS_SIZE_REGEX = re.compile(r"^(\d{1,4}(?:\.\d{1,4})?)(px|%|vh|hw|rem)?$", re.IGNORECASE)
 RGBA_REGEX = re.compile(r"^rgba\((\d{1,3}),(\d{1,3}),(\d{1,3}),(1|(?:0\.)?\d{1,2})\)$", re.IGNORECASE)

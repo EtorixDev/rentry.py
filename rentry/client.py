@@ -138,13 +138,9 @@ class RentryBase:
         if response_status == "200":
             return response_content
         elif "This page does not have a SECRET_RAW_ACCESS_CODE set." in response_content:
-            raise RentryInvalidAuthTokenError(
-                "The page does not have a SECRET_RAW_ACCESS_CODE set and you did not provide an auth_token."
-            )
+            raise RentryInvalidAuthTokenError("The page does not have a SECRET_RAW_ACCESS_CODE set and you did not provide an auth_token.")
         elif "Value for SECRET_RAW_ACCESS_CODE not found." in response_content:
-            raise RentryInvalidAuthTokenError(
-                "The auth_token provided is invalid. Ensure the value is correct and was provided by rentry support."
-            )
+            raise RentryInvalidAuthTokenError("The auth_token provided is invalid. Ensure the value is correct and was provided by rentry support.")
         else:
             raise RentryInvalidResponseError(f"The rentry API returned a status code of {response_status}.")
 
@@ -191,9 +187,7 @@ class RentryBase:
             raise RentryExistingPageError("The page already exists.")
         elif "ACCESS_EASY_READ" in response_errors:
             if "Not a valid Rentry URL" in response_errors:
-                raise RentryInvalidMetadataError(
-                    "ACCESS_EASY_READ must be 300 characters or less and start with a forward slash or be the full rentry link (domain included)."
-                )
+                raise RentryInvalidMetadataError("ACCESS_EASY_READ must be 300 characters or less and start with a forward slash or be the full rentry link (domain included).")
             elif "Rentry URL doesnt exist" in response_errors:
                 raise RentryInvalidMetadataError("ACCESS_EASY_READ must be an existing rentry page.")
             else:
@@ -316,9 +310,7 @@ class RentrySyncClient(RentryBase):
         else:
             payload = self.payload
 
-        response: httpx.Response = httpx.request(
-            method, f"{self.base_url}{endpoint}", headers=self.headers, cookies=self.cookies, data=payload
-        )
+        response: httpx.Response = httpx.request(method, f"{self.base_url}{endpoint}", headers=self.headers, cookies=self.cookies, data=payload)
 
         if response.status_code == 403:
             raise RentryInvalidCSRFError("The CSRF token is invalid.")
@@ -347,7 +339,7 @@ class RentrySyncClient(RentryBase):
         """
 
         page_id = self._verify_page_id(page_id)
-        response: str = self._decipher_raw(self._get_response("GET", f"/api/raw/{page_id}"))
+        response: str = self._decipher_raw(self._get_response("GET", f"/api/raw/{page_id.lower()}"))
 
         return response
 
@@ -376,22 +368,14 @@ class RentrySyncClient(RentryBase):
         edit_code = self._verify_edit_code(edit_code) if not is_modify_code else self._verify_modify_code(edit_code)
         page_id = self._verify_page_id(page_id)
         payload: dict = {"edit_code": edit_code}
-        response: dict = self._decipher_fetch(self._get_response("POST", f"/api/fetch/{page_id}", payload))
+        response: dict = self._decipher_fetch(self._get_response("POST", f"/api/fetch/{page_id.lower()}", payload))
         page_id = response.get("url_case", "")
         markdown: str = response.get("text", "")
         modify_code_set: bool = response.get("modify_code_set", False)
-        published_date: Optional[datetime] = (
-            datetime.fromisoformat(response.get("pub_date", "")) if response.get("pub_date", "") else None
-        )
-        activated_date: Optional[datetime] = (
-            datetime.fromisoformat(response.get("activated_date", "")) if response.get("activated_date", "") else None
-        )
-        edited_date: Optional[datetime] = (
-            datetime.fromisoformat(response.get("edit_date", "")) if response.get("edit_date", "") else None
-        )
-        metadata: Optional[RentryPageMetadata] = (
-            RentryPageMetadata.build(response.get("metadata", {})) if response.get("metadata", {}) else None
-        )
+        published_date: Optional[datetime] = datetime.fromisoformat(response.get("pub_date", "")) if response.get("pub_date", "") else None
+        activated_date: Optional[datetime] = datetime.fromisoformat(response.get("activated_date", "")) if response.get("activated_date", "") else None
+        edited_date: Optional[datetime] = datetime.fromisoformat(response.get("edit_date", "")) if response.get("edit_date", "") else None
+        metadata: Optional[RentryPageMetadata] = RentryPageMetadata.build(response.get("metadata", {})) if response.get("metadata", {}) else None
         metadata_version: str | None = response.get("metadata_version", None)
         views: int | None = response.get("views", None)
 
@@ -428,7 +412,7 @@ class RentrySyncClient(RentryBase):
         """
 
         page_id = self._verify_page_id(page_id)
-        response: bool = self._decipher_exists(self._get_response("GET", f"/{page_id}/exists"))
+        response: bool = self._decipher_exists(self._get_response("GET", f"/{page_id.lower()}/exists"))
 
         return response
 
@@ -490,11 +474,7 @@ class RentrySyncClient(RentryBase):
         page_id = response["url"]
         edit_code = response["edit_code"]
 
-        return (
-            self.fetch(page_id, edit_code)
-            if fetch
-            else RentrySyncPage(self, page_id, markdown, edit_code, metadata=metadata)
-        )
+        return self.fetch(page_id, edit_code) if fetch else RentrySyncPage(self, page_id, markdown, edit_code, metadata=metadata)
 
     def update(
         self,
@@ -584,14 +564,12 @@ class RentrySyncClient(RentryBase):
         if not overwrite:
             payload["update_mode"] = "upsert"
 
-        self._decipher_update(self._get_response("POST", f"/api/edit/{page_id}", payload))
+        self._decipher_update(self._get_response("POST", f"/api/edit/{page_id.lower()}", payload))
 
         if fetch:
             updated_page: RentrySyncPage = self.fetch(new_page_id or page_id, new_edit_code or edit_code)
         else:
-            updated_page: RentrySyncPage = RentrySyncPage(
-                self, new_page_id or page_id, markdown, new_edit_code or edit_code, new_modify_code, metadata
-            )
+            updated_page: RentrySyncPage = RentrySyncPage(self, new_page_id or page_id, markdown, new_edit_code or edit_code, new_modify_code, metadata)
 
         updated_page.modify_code = new_modify_code
 
@@ -619,7 +597,7 @@ class RentrySyncClient(RentryBase):
         edit_code = self._verify_edit_code(edit_code)
         page_id = self._verify_page_id(page_id)
         payload: dict = {"edit_code": edit_code}
-        self._decipher_delete(self._get_response("POST", f"/api/delete/{page_id}", payload))
+        self._decipher_delete(self._get_response("POST", f"/api/delete/{page_id.lower()}", payload))
 
         return RentrySyncPage(self, page_id)
 
@@ -766,9 +744,7 @@ class RentrySyncPage:
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        page: RentrySyncPage = self.client.create(
-            self.markdown or "", self.page_id, self.edit_code, self.metadata, fetch
-        )
+        page: RentrySyncPage = self.client.create(self.markdown or "", self.page_id, self.edit_code, self.metadata, fetch)
         self.edit_code = page.edit_code
         self.modify_code = None
         self.markdown = page.markdown
@@ -938,9 +914,7 @@ class RentryAsyncClient(RentryBase):
             payload = self.payload
 
         async with httpx.AsyncClient() as client:
-            response: httpx.Response = await client.request(
-                method, f"{self.base_url}{endpoint}", headers=self.headers, cookies=self.cookies, data=payload
-            )
+            response: httpx.Response = await client.request(method, f"{self.base_url}{endpoint}", headers=self.headers, cookies=self.cookies, data=payload)
 
         if response.status_code == 403:
             raise RentryInvalidCSRFError("The CSRF token is invalid.")
@@ -969,7 +943,7 @@ class RentryAsyncClient(RentryBase):
         """
 
         page_id = self._verify_page_id(page_id)
-        response: str = self._decipher_raw(await self._get_response("GET", f"/api/raw/{page_id}"))
+        response: str = self._decipher_raw(await self._get_response("GET", f"/api/raw/{page_id.lower()}"))
 
         return response
 
@@ -998,22 +972,14 @@ class RentryAsyncClient(RentryBase):
         edit_code = self._verify_edit_code(edit_code) if not is_modify_code else self._verify_modify_code(edit_code)
         page_id = self._verify_page_id(page_id)
         payload: dict = {"edit_code": edit_code}
-        response: dict = self._decipher_fetch(await self._get_response("POST", f"/api/fetch/{page_id}", payload))
+        response: dict = self._decipher_fetch(await self._get_response("POST", f"/api/fetch/{page_id.lower()}", payload))
         page_id = response.get("url_case", "")
         markdown: str = response.get("text", "")
         modify_code_set: bool = response.get("modify_code_set", False)
-        published_date: Optional[datetime] = (
-            datetime.fromisoformat(response.get("pub_date", "")) if response.get("pub_date", "") else None
-        )
-        activated_date: Optional[datetime] = (
-            datetime.fromisoformat(response.get("activated_date", "")) if response.get("activated_date", "") else None
-        )
-        edited_date: Optional[datetime] = (
-            datetime.fromisoformat(response.get("edit_date", "")) if response.get("edit_date", "") else None
-        )
-        metadata: Optional[RentryPageMetadata] = (
-            RentryPageMetadata.build(response.get("metadata", {})) if response.get("metadata", {}) else None
-        )
+        published_date: Optional[datetime] = datetime.fromisoformat(response.get("pub_date", "")) if response.get("pub_date", "") else None
+        activated_date: Optional[datetime] = datetime.fromisoformat(response.get("activated_date", "")) if response.get("activated_date", "") else None
+        edited_date: Optional[datetime] = datetime.fromisoformat(response.get("edit_date", "")) if response.get("edit_date", "") else None
+        metadata: Optional[RentryPageMetadata] = RentryPageMetadata.build(response.get("metadata", {})) if response.get("metadata", {}) else None
         metadata_version: str | None = response.get("metadata_version", None)
         views: int | None = response.get("views", None)
 
@@ -1050,7 +1016,7 @@ class RentryAsyncClient(RentryBase):
         """
 
         page_id = self._verify_page_id(page_id)
-        response: bool = self._decipher_exists(await self._get_response("GET", f"/{page_id}/exists"))
+        response: bool = self._decipher_exists(await self._get_response("GET", f"/{page_id.lower()}/exists"))
 
         return response
 
@@ -1112,11 +1078,7 @@ class RentryAsyncClient(RentryBase):
         page_id = response["url"]
         edit_code = response["edit_code"]
 
-        return (
-            await self.fetch(page_id, edit_code)
-            if fetch
-            else RentryAsyncPage(self, page_id, markdown, edit_code, metadata=metadata)
-        )
+        return await self.fetch(page_id, edit_code) if fetch else RentryAsyncPage(self, page_id, markdown, edit_code, metadata=metadata)
 
     async def update(
         self,
@@ -1206,14 +1168,12 @@ class RentryAsyncClient(RentryBase):
         if not overwrite:
             payload["update_mode"] = "upsert"
 
-        self._decipher_update(await self._get_response("POST", f"/api/edit/{page_id}", payload))
+        self._decipher_update(await self._get_response("POST", f"/api/edit/{page_id.lower()}", payload))
 
         if fetch:
             updated_page: RentryAsyncPage = await self.fetch(new_page_id or page_id, new_edit_code or edit_code)
         else:
-            updated_page: RentryAsyncPage = RentryAsyncPage(
-                self, new_page_id or page_id, markdown, new_edit_code or edit_code, new_modify_code, metadata
-            )
+            updated_page: RentryAsyncPage = RentryAsyncPage(self, new_page_id or page_id, markdown, new_edit_code or edit_code, new_modify_code, metadata)
 
         updated_page.modify_code = new_modify_code
 
@@ -1241,7 +1201,7 @@ class RentryAsyncClient(RentryBase):
         edit_code = self._verify_edit_code(edit_code)
         page_id = self._verify_page_id(page_id)
         payload: dict = {"edit_code": edit_code}
-        self._decipher_delete(await self._get_response("POST", f"/api/delete/{page_id}", payload))
+        self._decipher_delete(await self._get_response("POST", f"/api/delete/{page_id.lower()}", payload))
 
         return RentryAsyncPage(self, page_id)
 
@@ -1388,9 +1348,7 @@ class RentryAsyncPage:
         - `RentryInvalidCSRFError` when the CSRF token is invalid.
         """
 
-        page: RentryAsyncPage = await self.client.create(
-            self.markdown or "", self.page_id, self.edit_code, self.metadata, fetch
-        )
+        page: RentryAsyncPage = await self.client.create(self.markdown or "", self.page_id, self.edit_code, self.metadata, fetch)
         self.edit_code = page.edit_code
         self.modify_code = None
         self.markdown = page.markdown

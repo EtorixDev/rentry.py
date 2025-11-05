@@ -20,9 +20,9 @@ This package allows for accessing the [rentry](https://rentry.co/) API through t
 ```
 pip install rentry.py
 ```
-Or added to your project via poetry:
+Or added to your project via uv:
 ```
-poetry add rentry.py
+uv add rentry.py
 ```
 
 ## Command Line
