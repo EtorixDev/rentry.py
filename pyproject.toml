@@ -1,6 +1,6 @@
 [project]
 name = "rentry.py"
-version = "0.3.9"
+version = "0.3.10"
 description = "A python wrapper for the rentry markdown service."
 authors = [{name = "Etorix", email = "admin@etorix.dev"}]
 license = "MIT"
