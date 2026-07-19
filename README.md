@@ -1,176 +1,166 @@
-# [rentry.py](https://github.com/EtorixDev/rentry.py)
-[![](https://img.shields.io/pypi/v/rentry.py.svg?style=flat-square&color=5677a6)](https://pypi.org/project/rentry.py/)
-[![](https://img.shields.io/pypi/pyversions/rentry.py.svg?style=flat-square&color=5677a6)](https://pypi.org/project/rentry.py/)
-[![](https://img.shields.io/pypi/dm/rentry.py.svg?style=flat-square&color=5677a6)](https://pypi.org/project/rentry.py/)
-[![](https://img.shields.io/pypi/l/rentry.py.svg?style=flat-square&color=51a851)](https://pypi.org/project/rentry.py/)
+# rentry.py
 
-A python wrapper for the rentry markdown service.
+[![PyPI](https://img.shields.io/pypi/v/rentry.py.svg?style=flat-square&color=5677a6)](https://pypi.org/project/rentry.py/)
+[![Python](https://img.shields.io/pypi/pyversions/rentry.py.svg?style=flat-square&color=5677a6)](https://pypi.org/project/rentry.py/)
+[![License](https://img.shields.io/pypi/l/rentry.py.svg?style=flat-square&color=51a851)](https://pypi.org/project/rentry.py/)
 
-This package allows for accessing the [rentry](https://rentry.co/) API through the command line or as a module in your project.
+A typed synchronous and asynchronous Python client for the [Rentry](https://rentry.co/) Markdown publishing service.
 
-- [Installation](#installation)
-- [Command Line](#command-line)
-- [Module](#module)
-    - [Basic](#basic)
-    - [Advanced](#advanced)
-- [Auth Tokens](#auth-tokens)
 
 ## Installation
-`rentry.py` can be installed via pip:
-```
+
+```console
 pip install rentry.py
 ```
-Or added to your project via uv:
-```
+
+Or with uv:
+
+```console
 uv add rentry.py
 ```
 
-## Command Line
-The command interface offers every endpoint as terminal commands. Those commands and their arguments are detailed below.
+## Library Usage
 
-### Commands
-- `help`: Show this help message.
-- `read`: Get the raw markdown of a page with a `SECRET_RAW_ACCESS_CODE` set or if you provide an `--auth-token`.
-    - `rentry read <--page-id PAGE_ID> [--auth-token AUTH_TOKEN]`
-- `fetch`: Fetch the data for a page you have the edit code for.
-    - `rentry fetch <--page-id PAGE_ID> <--edit-code EDIT_CODE>`
-- `exists`: Check if a page exists.
-    - `rentry exists <--page-id PAGE_ID>`
-- `create`: Create a new page.
-    - `rentry create <--markdown MARKDOWN> [--page-id PAGE_ID] [--edit-code EDIT_CODE] [--metadata METADATA]`
-- `update`: Update a page you have the edit or modify code for.
-    - `rentry update <--page-id PAGE_ID> <--edit-code EDIT_CODE> [--new-page-id NEW_PAGE_ID] [--new-edit-code NEW_EDIT_CODE] [--new-modify-code NEW_MODIFY_CODE] [--markdown MARKDOWN] [--metadata METADATA] [--overwrite]`
-- `delete`: Delete a page you have the edit code for.
-    - `rentry delete <--page-id PAGE_ID> <--edit-code EDIT_CODE>`
+```python
+from rentry import Client
 
-### Arguments
-- `--page-id`
-- `--edit-code`
-    - When used with the `update` command this can be a modify code instead.
-    - Modify codes start with `m:` and do not allow updating the edit or modify codes or deleting the page.
-- `--auth-token`
-    - Auth tokens are acquired by contacting rentry support.
-- `--new-page-id`
-    - Must be between 2 and 100 characters.
-    - Must contain only latin letters, numbers, underscores and hyphens.
-    - Will cause the existing modify code to reset if set.
-- `--new-edit-code`
-    - Must be between 1 and 100 characters.
-    - Can't start with `m:` as that is reserved for modify codes.
-- `--new-modify-code`
-    - Must start with `m:` and be between 1 and 100 characters.
-    - Provide `m:` to remove the modify code.
-- `--markdown`
-    - Must be between 1 and 200,000 characters.
-- `--metadata`
-    - A JSON string containing `'{"string": "string"}'` key-value pairs.
-- `--overwrite`
-    - Whether to overwrite the existing markdown and metadata with the new values.
-- `--base-url`
-    - The base URL to use.
-    - Defaults to `https://rentry.co` but can be set to `https://rentry.org`.
-    - All data is shared between the two domains.
+with Client() as client:
+    created = client.create(
+        "# Hello\n",
+        slug="my-page",
+        metadata={"PAGE_TITLE": "Hello!"},
+    )
 
-### Examples
-- `rentry read --page-id py`
-- `rentry fetch --page-id py --edit-code pyEditCode`
-- `rentry exists --page-id py`
-- `rentry create --markdown "Hello, World!" --page-id py --edit-code pyEditCode`
-- `rentry delete --page-id py --edit-code pyEditCode --base-url "https://rentry.org"`
+    print(created.url)
+    print(created.edit_code)
 
-## Module
-### Basic
-The module interface offers every endpoint as methods: `read()`, `fetch()`, `exists()`, `create()`, `update()`, and `delete()`. The `read()` method is an alias of the `raw` endpoint and the `create()` method is an alias of the `new` endpoint.
+    client.update(
+        created.slug,
+        created.edit_code,
+        text="# Updated\n",
+        metadata={"PAGE_DESCRIPTION": "An updated page!"},
+    )
 
-Instantiate a synchronous or asynchronous client to get started with `rentry.py`.
+    page = client.fetch(created.slug, created.edit_code)
+    print(page.text)
+```
+
 ```python
 import asyncio
 
-from rentry import RentryAsyncClient, RentryAsyncPage, RentrySyncClient, RentrySyncPage
+from rentry import AsyncClient
 
-sync_client = RentrySyncClient()
-async_client = RentryAsyncClient()
+
+async def main() -> None:
+    async with AsyncClient() as client:
+        created = await client.create("# Hello!\n")
+        page = await client.fetch(created.slug, created.edit_code)
+        print(page.url)
+
+
+asyncio.run(main())
 ```
 
-You can customize the API base url by passing the client either `"https://rentry.co"` (default) or `"https://rentry.org"`. Both domains work the same and all data is shared between them.
+### Operations
 
-If one isn't passed, a CSRF token will be generated automatically by requesting one from rentry and it will be stored in `csrf_token`. The headers returned by the API imply these CSRF tokens last one year. It's unclear if anything will void them before that cutoff, however a new one can be generated at any time by calling `client.refresh_session()`. Alternatively, if you would like to generate a new CSRF token on each request, which would end up doubling the number of requests in total, you can pass `use_session = False` to the client.
+- `create(text, *, metadata=UNSET, slug=None, edit_code=None) -> CreatedPage`
+- `fetch(slug, edit_code) -> Page`
+- `exists(slug) -> bool`
+- `raw(slug, *, access_code=None) -> str`
+- `update(...) -> None` for partial, non-destructive upserts
+- `replace(..., text=..., metadata=...) -> None` for explicit full replacement
+- `delete(slug, edit_code) -> None`
 
-You can then call the endpoints directly on the clients.
+Every operation accepts either a bare slug or a full `https://rentry.co`/`https://rentry.org` page URL. Pass `domain="rentry.org"` to `Client` or `AsyncClient` to use that domain instead of `rentry.co`.
+
+### Safe Updates And Explicit Replacement
+
+`update()` always sends Rentry's `upsert` mode. Omitted text and metadata remain unchanged, an empty text string clears the page text, and a metadata value of `None` removes that option.
+
 ```python
-markdown: str = sync_client.read("py")
-print(markdown)
-# A python wrapper for the rentry markdown service.
+client.update(
+    "my-page",
+    "edit-code",
+    metadata={
+        "PAGE_TITLE": "New Title",
+        "PAGE_DESCRIPTION": None,
+    },
+)
 ```
 
-Or, you can utilize the pages returned by `fetch()`, `create()`, and `update()`.
+Use `replace()` when you intentionally want to replace the entire document. It requires both `text` and `metadata`, including when either is empty, so an omitted argument cannot silently clear a page.
+
 ```python
-py_page: RentrySyncPage = sync_client.fetch("py", "1234")
-print(py_page.exists())
-# True
-py_page.delete()
-print(py_page.exists())
-# False
-py_page.create()
-print(py_page.exists())
-# True
-
-new_page: RentrySyncPage = sync_client.create("Hello, World!")
-print(new_page.markdown)
-# Hello, World!
-print(new_page.page_url)
-# https://rentry.co/<randomly_generated_string>
-print(new_page.edit_code)
-# <randomly_generated_string>
+client.replace("my-page", "edit-code", text="", metadata={})
 ```
 
-By default when you receive a `RentrySyncPage` or `RentryAsyncPage` their `stats` attribute will be empty. It's required to call `fetch()` to receive the extra page data. You can avoid doing this manually by passing `fetch = True` to `create()` or `update()`.
+Previously set `SECRET_*` metadata is protected by Rentry. Pass `allow_secret_metadata_changes=True` only when an update should be allowed to change or remove those values.
+
+Set `new_modify_code=None` in `update()` to remove a modify code. New modify codes must begin with `m:`. A modify code can update content and metadata, but the client rejects attempts to rotate the slug or codes with one. Deletion always requires the full edit code.
+
+### Metadata
+
+Known metadata keys are available through the `Metadata` `TypedDict`:
+
 ```python
-print(new_page.stats.published_date)
-# None
-new_page.delete()
-new_page.create(fetch = True)
-print(new_page.stats.published_date)
-# 2025-02-22 01:15:30
+from rentry import Metadata
+
+metadata: Metadata = {
+    "PAGE_TITLE": "Example",
+    "OPTION_DISABLE_VIEWS": True,
+    "CONTENT_TEXT_COLOR": ["black", "white"],
+}
 ```
 
-If you would like to identify yourself to the rentry API, you can do so by passing a `user_agent` to the client.
-```python
-sync_client = RentrySyncClient(user_agent = "My Cool Project")
+Mappings, JSON object strings, and Rentry's newline-separated `KEY = value` syntax are accepted. Unknown string keys are passed through deliberately so newly added Rentry options work before the next library release. Detailed option validation remains server-authoritative. See Rentry's [metadata reference](https://rentry.co/metadata-how).
+
+### Errors
+
+All library exceptions derive from `RentryError`. Local input errors use `InvalidSlugError`, `InvalidEditCodeError`, and `InvalidMetadataError`. Connection failures use `TransportError`, malformed server responses use `ProtocolError`, and documented Rentry application statuses map to structured `APIError` subclasses:
+
+- `ValidationError` (`400`)
+- `AccessDeniedError` (`403`)
+- `NotFoundError` (`404`)
+- `MethodNotAllowedError` (`405`)
+- `RateLimitError` (`429`)
+- `ServiceUnavailableError` (`503`)
+
+`APIError` exposes the original `status`, `content`, and `errors` fields.
+
+### Session Injection
+
+Pass an existing `niquests.Session` or `niquests.AsyncSession` through `session=` to integrate with application-owned transport configuration. Injected sessions are never closed by the client. Sessions created by the client are closed by `close()`/`aclose()` or the context manager.
+
+## Command Line
+
+The installed `rentry` command provides the same service operations:
+
+```console
+rentry create "# Hello"
+rentry create --file page.md --metadata-file metadata.json --slug my-page
+rentry fetch my-page --edit-code EDIT_CODE
+rentry exists my-page
+rentry raw my-page --access-code ACCESS_CODE
+rentry update my-page --edit-code EDIT_CODE --text "# Updated"
+rentry replace my-page --edit-code EDIT_CODE --file page.md --metadata '{}'
+rentry delete my-page --edit-code EDIT_CODE
 ```
 
-This will make your request appear as `My-Cool-Project rentry.py/x.y.z (PyPI)` to the API.
+Create and fetch results are JSON, mutation success is `{"ok": true}`, and errors go to stderr with a nonzero exit status. `create`, `update`, and `replace` support UTF-8 files and stdin. Use `rentry --help` or `rentry COMMAND --help` for all options.
 
-This is not required and at this time it is unknown if rentry will even make use of this information in any way.
+Global options such as `--domain` and `--timeout` go before the command:
 
-### Advanced
-You can gain more control over your page style by making use of `RentryPageMetadata`. This is a mirror of the options listed at [rentry/metadata-how](https://rentry.co/metadata-how). You can also see a basic example of how metadata works at [rentry/metadata-example](https://rentry.co/metadata-example).
-
-There are multiple ways to utilize the `RentryPageMetadata` object. The first is to build it through passing arguments. The second is through building it with a JSON string. The third is through building it with a dict.
-```python
-from rentry import RentryPageMetadata, RentrySyncClient, RentrySyncPage
-
-sync_client = RentrySyncClient()
-metadata_one = RentryPageMetadata(PAGE_TITLE="This is an example.")
-metadata_two = RentryPageMetadata.build('{"PAGE_TITLE": "This is an example."}')
-metadata_three = RentryPageMetadata.build({"PAGE_TITLE": "This is an example."})
-
-page: RentrySyncPage = sync_client.create("Hello, World", metadata = metadata_one)
-print(page.metadata.PAGE_TITLE)
-# This is an example.
+```console
+rentry --domain rentry.org --timeout 15 exists my-page
 ```
 
-The validations done to the metadata are extensive. They can be found in the docstring or in the tutorial link above. Most of rentry's validations have been mirrored in the class, meaning if you attempt to use invalid metadata an error will be raised before sending a request to the API. There are two exceptions to this.
+## Development
 
-The first is `ACCESS_EASY_READ` which requires an existing rentry url as its value. Checking that would require an API call of its own, so the class simply doesn't check it before sending the request to the API. The API will send a non-200 response if the URL does not exist, so an error is raised then instead.
+Install the locked development environment and run the complete local gate:
 
-The second is `CONTENT_FONT` which requires an existing font on Google Fonts. It's possible to query the Google Fonts API, however rentry itself also does not validate fonts. If an invalid value is used here it will silently fail to load on the page.
+```console
+uv sync --frozen
+uv run python scripts/verify.py
+```
 
-## Auth Tokens
-Auth tokens are how you access the `raw` endpoint through the `read()` method. No other endpoint requires auth tokens at this time.
-
-You obtain an auth token by contacting rentry support with your request. There are two ways to make use of the auth token once acquired.
-
-The first is through setting the `SECRET_RAW_ACCESS_CODE` metadata on a page. By doing so, anyone will be able to access the `raw` endpoint for your page. If you have an auth token, you can add it to your page like so: `SECRET_RAW_ACCESS_CODE = auth_token`. Once you save your changes the token will internally be obfuscated by rentry, so there is no need to worry about your token being stolen by someone else with edit access. However, as of 2025-02-22, there is a bug where if you save a `SECRET_RAW_ACCESS_CODE` to your page, even after you remove it users will be able to access the `raw` endpoint for your page. The only solution to stop it is to delete the page.
-
-The second is by providing your auth token to the client as the `auth_token` argument. This will grant you access to any page's `raw` version regardless of if they have a `SECRET_RAW_ACCESS_CODE` set or not.
+The verifier compiles every Python file, enforces custom styling, checks Ruff formatting and lint, runs strict Pyright, and executes the test suite.

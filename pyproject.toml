@@ -1,51 +1,85 @@
 [project]
 name = "rentry.py"
-version = "0.3.10"
-description = "A python wrapper for the rentry markdown service."
-authors = [{name = "Etorix", email = "admin@etorix.dev"}]
-license = "MIT"
+version = "1.0.0"
+description = "A synchronous and asynchronous Python client for Rentry."
 readme = "README.md"
-requires-python = ">=3.9"
-keywords = ["rentry", "markdown", "api", "wrapper", "command line", "synchronous", "asynchronous"]
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Etorix", email = "admin@etorix.dev" }]
+keywords = ["rentry", "pastebin", "markdown", "api", "async"]
 classifiers = [
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14"
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
 ]
-dependencies = [
-    "httpx>=0.28.1"
-]
-
-[dependency-groups]
-dev = [
-    "pytest>=8.4.2",
-    "pytest-cov>=7.0.0",
-    "ruff>=0.14.3",
-]
+dependencies = ["niquests>=3.20.0,<4.0.0"]
 
 [project.urls]
-Homepage = "https://pypi.org/project/rentry.py/"
-Repository = "https://github.com/EtorixDev/rentry.py/"
+Homepage = "https://github.com/EtorixDev/rentry.py"
+Documentation = "https://github.com/EtorixDev/rentry.py#readme"
+Issues = "https://github.com/EtorixDev/rentry.py/issues"
+Source = "https://github.com/EtorixDev/rentry.py"
 Sponsor = "https://github.com/sponsors/EtorixDev"
 Donate = "https://ko-fi.com/Etorix"
 
 [project.scripts]
 rentry = "rentry.cli:main"
 
+[dependency-groups]
+dev = [
+    "etdpystyle",
+    "pyright>=1.1.411,<1.2.0",
+    "pytest>=9.1.1,<10.0.0",
+    "pytest-asyncio>=1.4.0,<2.0.0",
+    "pytest-cov>=7.1.0,<8.0.0",
+    "ruff>=0.15.20,<0.16.0",
+]
+
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.30.1,<2.0.0"]
 build-backend = "hatchling.build"
 
-[tool.uv]
-allow-insecure-host = ["files.pythonhosted.org", "pypi.org"]
-
 [tool.hatch.build.targets.wheel]
-packages = ["rentry"]
+packages = ["src/rentry"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/rentry", "scripts", "tests", "README.md", "LICENSE"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers"
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+branch = true
+source = ["src/rentry"]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+skip_covered = true
 
 [tool.ruff]
-line-length = 120
+line-length = 320
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "RUF", "SIM", "UP"]
+
+[tool.pyright]
+include = ["src", "scripts", "tests"]
+pythonVersion = "3.11"
+typeCheckingMode = "strict"
+venv = ".venv"
+venvPath = "."
+reportUnnecessaryIsInstance = false
+
+[tool.uv]
+exclude-newer = "2 weeks"
+
+[tool.uv.sources]
+etdpystyle = { git = "https://github.com/EtorixDev/etdpystyle.git" }
