@@ -2,6 +2,8 @@
 
 [![PyPI](https://img.shields.io/pypi/v/rentry.py.svg?style=flat-square&color=5677a6)](https://pypi.org/project/rentry.py/)
 [![Python](https://img.shields.io/pypi/pyversions/rentry.py.svg?style=flat-square&color=5677a6)](https://pypi.org/project/rentry.py/)
+[![Downloads](https://img.shields.io/pypi/dm/rentry.py.svg?style=flat-square&color=5677a6)](https://pypi.org/project/rentry.py/)
+[![Build](https://img.shields.io/github/actions/workflow/status/EtorixDev/rentry.py/tests.yml?branch=main&style=flat-square&color=51a851)](https://github.com/EtorixDev/rentry.py/actions/workflows/tests.yml)
 [![License](https://img.shields.io/pypi/l/rentry.py.svg?style=flat-square&color=51a851)](https://pypi.org/project/rentry.py/)
 
 A typed synchronous and asynchronous Python client for the [Rentry](https://rentry.co/) Markdown publishing service.
