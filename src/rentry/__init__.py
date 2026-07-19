@@ -1,6 +1,6 @@
 """A Python client for Rentry."""
 
-from importlib.metadata import PackageNotFoundError, version
+from importlib.metadata import version
 
 from .client import DEFAULT_DOMAIN, DEFAULT_USER_AGENT, UNSET, AsyncClient, Client, RentryDomain, UnsetType
 from .exceptions import (
@@ -21,10 +21,7 @@ from .exceptions import (
 from .metadata import Metadata, MetadataInput, MetadataPatch, MetadataPatchValue, MetadataValue
 from .models import CreatedPage, Page
 
-try:
-    __version__ = version("rentry.py")
-except PackageNotFoundError:
-    __version__ = "1.0.0"
+__version__ = version("rentry.py")
 
 __all__ = [
     "DEFAULT_DOMAIN",

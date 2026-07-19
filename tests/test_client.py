@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from importlib.metadata import PackageNotFoundError
 
 import pytest
 from niquests.exceptions import RequestException
@@ -335,13 +334,7 @@ def test_raw_rejects_non_text_success_content() -> None:
         Client(session=session).raw("example")  # type: ignore[arg-type]
 
 
-def test_internal_version_fallback_and_unset_representation(monkeypatch: pytest.MonkeyPatch) -> None:
-    def missing_version(_: str) -> str:
-        raise PackageNotFoundError
-
-    monkeypatch.setattr(client_module, "version", missing_version)
-
-    assert client_module._package_version() == "1.0.0"  # pyright: ignore[reportPrivateUsage]
+def test_unset_representation() -> None:
     assert repr(client_module.UNSET) == "UNSET"
 
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from importlib.metadata import PackageNotFoundError, version
+from importlib.metadata import version
 from typing import Any, Final, Literal, cast
 from urllib.parse import urlsplit
 
@@ -17,16 +17,7 @@ from .models import CreatedPage, Page, page_from_content
 
 RentryDomain = Literal["rentry.co", "rentry.org"]
 DEFAULT_DOMAIN: Final[RentryDomain] = "rentry.co"
-
-
-def _package_version() -> str:
-    try:
-        return version("rentry.py")
-    except PackageNotFoundError:
-        return "1.0.0"
-
-
-DEFAULT_USER_AGENT: Final = f"rentry.py/{_package_version()} (PyPI)"
+DEFAULT_USER_AGENT: Final = f"rentry.py/{version('rentry.py')} (PyPI)"
 
 
 class UnsetType:
