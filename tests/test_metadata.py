@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from typing import cast
+
 import pytest
 
-from rentry import InvalidMetadataError, ProtocolError
+from rentry import InvalidMetadataError, MetadataInput, ProtocolError
 from rentry.metadata import decode_metadata, encode_metadata
 
 
@@ -32,7 +34,7 @@ def test_metadata_does_not_mutate_sequence_inputs() -> None:
 )
 def test_invalid_metadata_is_rejected(metadata: object) -> None:
     with pytest.raises(InvalidMetadataError):
-        encode_metadata(metadata)  # type: ignore[arg-type]
+        encode_metadata(cast(MetadataInput, metadata))
 
 
 def test_fetch_metadata_accepts_json_strings() -> None:

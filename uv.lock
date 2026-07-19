@@ -3,7 +3,7 @@ revision = 3
 requires-python = ">=3.11"
 
 [options]
-exclude-newer = "2026-07-05T05:39:46.760219709Z"
+exclude-newer = "2026-07-05T08:43:54.415632971Z"
 exclude-newer-span = "P2W"
 
 [[package]]
@@ -196,7 +196,7 @@ toml = [
 [[package]]
 name = "etdpystyle"
 version = "0.2.0"
-source = { git = "https://github.com/EtorixDev/etdpystyle.git#5ffc8a34b01ef205c24a67cf6956493a09e3a23b" }
+source = { git = "https://github.com/EtorixDev/etdpystyle.git#e43e6afff61c3f7d4feb681c42599386b56d49f4" }
 
 [[package]]
 name = "h11"

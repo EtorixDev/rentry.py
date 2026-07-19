@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
+
+import niquests
 
 
 class FakeResponse:
@@ -48,3 +50,13 @@ class FakeAsyncSession(_FakeSessionBase):
 
     async def close(self) -> None:
         self.close_calls += 1
+
+
+def session_for_client(session: FakeSession) -> niquests.Session:
+    """Adapt a synchronous test session to the public client boundary."""
+    return cast(niquests.Session, session)
+
+
+def session_for_async_client(session: FakeAsyncSession) -> niquests.AsyncSession:
+    """Adapt an asynchronous test session to the public client boundary."""
+    return cast(niquests.AsyncSession, session)

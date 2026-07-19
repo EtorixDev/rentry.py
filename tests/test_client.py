@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import datetime
+from typing import cast
 
 import pytest
 from niquests.exceptions import RequestException
@@ -13,12 +15,13 @@ from rentry import (
     InvalidEditCodeError,
     InvalidSlugError,
     ProtocolError,
+    RentryDomain,
     RentryError,
     TransportError,
 )
 from rentry.models import page_from_content
 
-from .conftest import FakeAsyncSession, FakeResponse, FakeSession
+from .conftest import FakeAsyncSession, FakeResponse, FakeSession, session_for_async_client, session_for_client
 
 
 def success(content: object = "OK", **fields: object) -> FakeResponse:
@@ -34,7 +37,7 @@ def test_create_preserves_text_and_builds_a_secret_safe_model() -> None:
         )
     )
 
-    client = Client(session=session)  # type: ignore[arg-type]
+    client = Client(session=session_for_client(session))
     page = client.create("  first line\nlast line\n", metadata={"PAGE_TITLE": "Title"}, slug="MixedCase")
 
     assert page == CreatedPage(
@@ -54,7 +57,7 @@ def test_create_preserves_text_and_builds_a_secret_safe_model() -> None:
 
 def test_create_accepts_success_fields_nested_in_content() -> None:
     session = FakeSession(success({"url": "https://rentry.co/example", "url_short": "example", "edit_code": "edit"}))
-    page = Client(session=session).create("")  # type: ignore[arg-type]
+    page = Client(session=session_for_client(session)).create("")
 
     assert page.slug == "example"
     assert page.edit_code == "edit"
@@ -64,7 +67,7 @@ def test_page_urls_must_use_an_official_rentry_domain() -> None:
     session = FakeSession()
 
     with pytest.raises(InvalidSlugError):
-        Client(session=session).exists("https://rentry.example/example")  # type: ignore[arg-type]
+        Client(session=session_for_client(session)).exists("https://rentry.example/example")
 
     assert not session.requests
 
@@ -87,7 +90,7 @@ def test_fetch_returns_an_immutable_snapshot_and_keeps_raw_text() -> None:
         )
     )
 
-    page = Client(session=session).fetch("https://rentry.org/MixedCase", "m:shared")  # type: ignore[arg-type]
+    page = Client(session=session_for_client(session)).fetch("https://rentry.org/MixedCase", "m:shared")
 
     assert page.slug == "mixedcase"
     assert page.url == "https://rentry.co/MixedCase"
@@ -100,7 +103,7 @@ def test_fetch_returns_an_immutable_snapshot_and_keeps_raw_text() -> None:
     assert session.requests[0]["url"] == "https://rentry.co/api/fetch/mixedcase"
 
     with pytest.raises(TypeError):
-        page.metadata["PAGE_TITLE"] = "Changed"  # type: ignore[index]
+        cast(dict[str, object], page.metadata)["PAGE_TITLE"] = "Changed"
 
 
 def test_raw_access_code_is_scoped_to_the_raw_request() -> None:
@@ -115,7 +118,7 @@ def test_raw_access_code_is_scoped_to_the_raw_request() -> None:
         ),
     )
 
-    client = Client(session=session)  # type: ignore[arg-type]
+    client = Client(session=session_for_client(session))
 
     assert client.raw("example", access_code="raw-secret") == "markdown"
 
@@ -129,7 +132,7 @@ def test_raw_access_code_is_scoped_to_the_raw_request() -> None:
 def test_exists_uses_the_plain_text_endpoint(text: str, expected: bool) -> None:
     session = FakeSession(FakeResponse(status_code=200, text=text))
 
-    assert Client(session=session).exists("example") is expected  # type: ignore[arg-type]
+    assert Client(session=session_for_client(session)).exists("example") is expected
     assert session.requests[0]["url"] == "https://rentry.co/example/exists"
 
 
@@ -137,12 +140,12 @@ def test_exists_rejects_an_unexpected_protocol_response() -> None:
     session = FakeSession(FakeResponse(status_code=200, text="yes"))
 
     with pytest.raises(ProtocolError):
-        Client(session=session).exists("example")  # type: ignore[arg-type]
+        Client(session=session_for_client(session)).exists("example")
 
 
 def test_update_is_an_upsert_and_encodes_metadata_removal() -> None:
     session = FakeSession(success())
-    client = Client(session=session)  # type: ignore[arg-type]
+    client = Client(session=session_for_client(session))
 
     client.update(
         "example",
@@ -167,7 +170,7 @@ def test_update_rejects_rotation_with_a_modify_code_before_a_request() -> None:
     session = FakeSession()
 
     with pytest.raises(InvalidEditCodeError):
-        Client(session=session).update("example", "m:shared", new_slug="new-example")  # type: ignore[arg-type]
+        Client(session=session_for_client(session)).update("example", "m:shared", new_slug="new-example")
 
     assert not session.requests
 
@@ -176,12 +179,12 @@ def test_update_requires_a_change() -> None:
     session = FakeSession()
 
     with pytest.raises(ValueError, match="at least one"):
-        Client(session=session).update("example", "edit")  # type: ignore[arg-type]
+        Client(session=session_for_client(session)).update("example", "edit")
 
 
 def test_replace_always_sends_text_and_metadata() -> None:
     session = FakeSession(success())
-    Client(session=session).replace("example", "edit", text="", metadata={})  # type: ignore[arg-type]
+    Client(session=session_for_client(session)).replace("example", "edit", text="", metadata={})
 
     assert session.requests[0]["data"] == {
         "edit_code": "edit",
@@ -195,13 +198,13 @@ def test_delete_rejects_modify_codes() -> None:
     session = FakeSession()
 
     with pytest.raises(InvalidEditCodeError):
-        Client(session=session).delete("example", "m:shared")  # type: ignore[arg-type]
+        Client(session=session_for_client(session)).delete("example", "m:shared")
 
 
 def test_an_injected_session_is_not_closed() -> None:
     session = FakeSession()
 
-    with Client(session=session):  # type: ignore[arg-type]
+    with Client(session=session_for_client(session)):
         pass
 
     assert session.close_calls == 0
@@ -219,7 +222,7 @@ def test_an_owned_session_is_closed(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_closed_clients_fail_before_requesting() -> None:
     session = FakeSession()
-    client = Client(session=session)  # type: ignore[arg-type]
+    client = Client(session=session_for_client(session))
     client.close()
 
     with pytest.raises(RentryError, match="closed"):
@@ -232,14 +235,14 @@ def test_transport_failures_are_wrapped() -> None:
             raise RequestException("connection failed")
 
     with pytest.raises(TransportError, match="connection failed"):
-        Client(session=FailingSession()).raw("example")  # type: ignore[arg-type]
+        Client(session=session_for_client(FailingSession())).raw("example")
 
 
 @pytest.mark.asyncio
 async def test_async_client_matches_sync_payloads_and_closing_rules() -> None:
     session = FakeAsyncSession(success())
 
-    async with AsyncClient(session=session) as client:  # type: ignore[arg-type]
+    async with AsyncClient(session=session_for_async_client(session)) as client:
         await client.update("example", "edit", metadata={"PAGE_TITLE": None})
 
     assert session.requests[0]["data"] == {
@@ -261,7 +264,7 @@ async def test_async_client_exercises_the_complete_public_transport_surface() ->
         success(),
     )
 
-    client = AsyncClient(session=session)  # type: ignore[arg-type]
+    client = AsyncClient(session=session_for_async_client(session))
     created = await client.create("markdown")
     page = await client.fetch(created.slug, created.edit_code)
     exists = await client.exists(created.slug)
@@ -314,7 +317,7 @@ def test_fetch_rejects_malformed_success_content(content: object) -> None:
     session = FakeSession(success(content))
 
     with pytest.raises(ProtocolError):
-        Client(session=session).fetch("example", "edit")  # type: ignore[arg-type]
+        Client(session=session_for_client(session)).fetch("example", "edit")
 
 
 @pytest.mark.parametrize("code", ["", "m:", "x" * 101])
@@ -322,7 +325,7 @@ def test_invalid_edit_codes_fail_locally(code: str) -> None:
     session = FakeSession()
 
     with pytest.raises(InvalidEditCodeError):
-        Client(session=session).fetch("example", code)  # type: ignore[arg-type]
+        Client(session=session_for_client(session)).fetch("example", code)
 
     assert not session.requests
 
@@ -331,7 +334,7 @@ def test_raw_rejects_non_text_success_content() -> None:
     session = FakeSession(success({"text": "nested"}))
 
     with pytest.raises(ProtocolError):
-        Client(session=session).raw("example")  # type: ignore[arg-type]
+        Client(session=session_for_client(session)).raw("example")
 
 
 def test_unset_representation() -> None:
@@ -353,11 +356,14 @@ def test_unset_representation() -> None:
 )
 def test_invalid_domains_fail_locally(domain: object, error_type: type[Exception]) -> None:
     with pytest.raises(error_type):
-        Client(domain)  # type: ignore[arg-type]
+        Client(cast(RentryDomain, domain))
 
 
 def test_domains_and_page_urls_are_normalised() -> None:
-    client = Client(" RENTRY.ORG ", session=FakeSession(FakeResponse(status_code=200, text="True")))  # type: ignore[arg-type]
+    client = Client(
+        cast(RentryDomain, " RENTRY.ORG "),
+        session=session_for_client(FakeSession(FakeResponse(status_code=200, text="True"))),
+    )
 
     assert client.domain == "rentry.org"
     assert client.exists("https://rentry.co/example") is True
@@ -372,7 +378,7 @@ def test_operational_paths_lowercase_display_slugs_without_changing_requested_ne
         success(),
     )
 
-    client = Client(session=session)  # type: ignore[arg-type]
+    client = Client(session=session_for_client(session))
 
     assert client.exists("MixedCase") is True
     assert client.raw("https://rentry.org/MixedCase") == "markdown"
@@ -407,12 +413,12 @@ def test_operational_paths_lowercase_display_slugs_without_changing_requested_ne
 )
 def test_invalid_slugs_fail_locally(slug: object) -> None:
     with pytest.raises(TypeError if not isinstance(slug, str) else InvalidSlugError):
-        Client(session=FakeSession()).exists(slug)  # type: ignore[arg-type]
+        Client(session=session_for_client(FakeSession())).exists(cast(str, slug))
 
 
 def test_create_validates_and_forwards_all_optional_fields() -> None:
     session = FakeSession(success(url="example", edit_code="edit"))
-    page = Client(session=session).create("text", edit_code="chosen")  # type: ignore[arg-type]
+    page = Client(session=session_for_client(session)).create("text", edit_code="chosen")
 
     assert page.url == "https://rentry.co/example"
     assert page.short_url == "example"
@@ -437,7 +443,7 @@ def test_invalid_create_and_fetch_inputs(
     responses: tuple[FakeResponse, ...],
     error_type: type[Exception],
 ) -> None:
-    client = Client(session=FakeSession(*responses))  # type: ignore[arg-type]
+    client = Client(session=session_for_client(FakeSession(*responses)))
 
     with pytest.raises(error_type):
         getattr(client, method)(*args, **kwargs)
@@ -445,19 +451,19 @@ def test_invalid_create_and_fetch_inputs(
 
 def test_exists_rejects_http_errors_and_wraps_transport_failures() -> None:
     with pytest.raises(ProtocolError, match="HTTP status 503"):
-        Client(session=FakeSession(FakeResponse(status_code=503))).exists("example")  # type: ignore[arg-type]
+        Client(session=session_for_client(FakeSession(FakeResponse(status_code=503)))).exists("example")
 
     class FailingGetSession(FakeSession):
         def get(self, url: str, **kwargs: object) -> FakeResponse:
             raise RequestException("get failed")
 
     with pytest.raises(TransportError, match="get failed"):
-        Client(session=FailingGetSession()).exists("example")  # type: ignore[arg-type]
+        Client(session=session_for_client(FailingGetSession())).exists("example")
 
 
 def test_sync_client_close_is_idempotent_and_allows_successful_delete() -> None:
     session = FakeSession(success())
-    client = Client(session=session)  # type: ignore[arg-type]
+    client = Client(session=session_for_client(session))
     client.delete("example", "edit")
     client.close()
     client.close()
@@ -470,7 +476,7 @@ def test_sync_client_close_is_idempotent_and_allows_successful_delete() -> None:
 
 def test_update_forwards_rotations_and_validates_values() -> None:
     session = FakeSession(success(), success())
-    client = Client(session=session)  # type: ignore[arg-type]
+    client = Client(session=session_for_client(session))
 
     client.update(
         "example",
@@ -489,7 +495,7 @@ def test_update_forwards_rotations_and_validates_values() -> None:
     }
 
     with pytest.raises(TypeError, match="text"):
-        client.update("example", "edit", text=3)  # type: ignore[arg-type]
+        client.update("example", "edit", text=cast(str, 3))
 
     with pytest.raises(InvalidEditCodeError, match="start with"):
         client.update("example", "edit", new_modify_code="shared")
@@ -499,18 +505,18 @@ def test_update_forwards_rotations_and_validates_values() -> None:
     assert session.requests[1]["data"]["new_modify_code"] == "m:trimmed"
 
     with pytest.raises(TypeError, match="strings"):
-        client.update("example", "edit", new_modify_code=3)  # type: ignore[arg-type]
+        client.update("example", "edit", new_modify_code=cast(str, 3))
 
 
 def test_replace_validates_text_and_allows_secret_metadata_changes() -> None:
     session = FakeSession(success())
-    client = Client(session=session)  # type: ignore[arg-type]
+    client = Client(session=session_for_client(session))
     client.replace("example", "m:shared", text="text", metadata={}, allow_secret_metadata_changes=True)
 
     assert session.requests[0]["data"]["update_secret_metadata"] == "true"
 
     with pytest.raises(TypeError, match="text"):
-        client.replace("example", "edit", text=3, metadata={})  # type: ignore[arg-type]
+        client.replace("example", "edit", text=cast(str, 3), metadata={})
 
 
 @pytest.mark.asyncio
@@ -523,12 +529,12 @@ async def test_async_closed_and_transport_failures_are_wrapped() -> None:
             raise RequestException("async get failed")
 
     with pytest.raises(TransportError, match="async request failed"):
-        await AsyncClient(session=FailingAsyncSession()).raw("example")  # type: ignore[arg-type]
+        await AsyncClient(session=session_for_async_client(FailingAsyncSession())).raw("example")
 
     with pytest.raises(TransportError, match="async get failed"):
-        await AsyncClient(session=FailingAsyncSession()).exists("example")  # type: ignore[arg-type]
+        await AsyncClient(session=session_for_async_client(FailingAsyncSession())).exists("example")
 
-    client = AsyncClient(session=FakeAsyncSession())  # type: ignore[arg-type]
+    client = AsyncClient(session=session_for_async_client(FakeAsyncSession()))
     await client.aclose()
     await client.aclose()
 
@@ -553,10 +559,13 @@ def test_page_model_handles_empty_response_slugs_and_freezes_nested_metadata() -
 
     assert page.slug == "fallback"
     assert page.published_at is None
-    assert page.metadata["nested"]["colors"] == ("red",)  # type: ignore[index]
+
+    nested_metadata = cast(Mapping[str, object], page.metadata["nested"])
+
+    assert nested_metadata["colors"] == ("red",)
 
     with pytest.raises(TypeError):
-        page.metadata["nested"]["colors"] = ()  # type: ignore[index]
+        cast(dict[str, object], nested_metadata)["colors"] = ()
 
 
 def test_page_model_rejects_non_string_dates() -> None:

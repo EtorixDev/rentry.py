@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 import runpy
 import sys
@@ -7,12 +8,12 @@ from datetime import datetime
 from io import StringIO
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, ClassVar
+from typing import Any, ClassVar, cast
 
 import pytest
 
 import rentry.cli as cli
-from rentry import CreatedPage, Page, RentryError
+from rentry import Client, CreatedPage, Page, RentryError
 
 
 class FakeClient:
@@ -65,6 +66,11 @@ class FakeClient:
 
     def delete(self, *args: object, **kwargs: object) -> None:
         self.calls.append(("delete", args, kwargs))
+
+
+class TTYStringIO(StringIO):
+    def isatty(self) -> bool:
+        return True
 
 
 def test_help_is_parsed_before_a_client_is_constructed(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -294,8 +300,7 @@ def test_text_input_conflicts_and_missing_tty_input_are_parser_errors(
     with pytest.raises(SystemExit, match="2"):
         cli.main(["create", "direct", "--file", str(text_path)])
 
-    stdin = StringIO()
-    stdin.isatty = lambda: True  # type: ignore[method-assign]
+    stdin = TTYStringIO()
     monkeypatch.setattr(sys, "stdin", stdin)
 
     with pytest.raises(SystemExit, match="2"):
@@ -329,10 +334,11 @@ def test_helpers_reject_unknown_values() -> None:
         cli._json_default(object())  # pyright: ignore[reportPrivateUsage]
 
     parser = cli.build_parser()
-    args = type("Arguments", (), {"command": "unknown"})()
+    args = argparse.Namespace(command="unknown")
+    client = cast(Client, FakeClient("rentry.co"))
 
     with pytest.raises(SystemExit, match="2"):
-        cli._run_command(args, parser, FakeClient("rentry.co"))  # type: ignore[arg-type]
+        cli._run_command(args, parser, client)  # pyright: ignore[reportPrivateUsage]
 
 
 def test_main_uses_process_arguments_and_module_entrypoint(monkeypatch: pytest.MonkeyPatch) -> None:
